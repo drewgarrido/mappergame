@@ -29,9 +29,6 @@ function main()
     bmcc.clearRect(0,0,bmc.width, bmc.height);
     bmcc.font = "30px Arial";
     bmcc.fillText("Hello World",100,50);
-    //~ mcc.clearRect(0,0,mc.width, mc.height);
-    //~ mcc.font = "30px Arial";
-    //~ mcc.fillText("Hello World",100,50);
 
     player.render();
 
@@ -44,76 +41,125 @@ var Spider = function(ctx_pa)
 {
     this.x = 0;
     this.y = 0;
+    this.move_x = 0;
+    this.move_y = 0;
     this.icon = loadImage("spider.png");
     var ctx = ctx_pa;
 
     this.render = function()
     {
-        ctx.drawImage(this.icon, this.x, this.y);
-    };
-
-    this.upArrow = function()
-    {
-        this.y -= 1;
-
-        if (this.y < 0)
-        {
-            this.y = 0;
-        }
-    };
-
-    this.downArrow = function()
-    {
-        this.y += 1;
-
-        if (this.y > 450)
-        {
-            this.y = 450;
-        }
-    };
-
-    this.leftArrow = function()
-    {
-        this.x -= 1;
+        this.x += this.move_x;
 
         if (this.x < 0)
         {
             this.x = 0;
         }
-    };
-
-    this.rightArrow = function()
-    {
-        this.x += 1;
-
-        if (this.x > 600)
+        else if (this.x > 600)
         {
             this.x = 600;
         }
+
+        this.y += this.move_y;
+
+        if (this.y < 0)
+        {
+            this.y = 0;
+        }
+        else if (this.y > 450)
+        {
+            this.y = 450;
+        }
+
+        ctx.drawImage(this.icon, this.x, this.y);
     };
+
+    this.upArrowDown = function()
+    {
+        this.move_y = -1;
+    };
+
+    this.downArrowDown = function()
+    {
+        this.move_y = 1;
+    };
+
+    this.leftArrowDown = function()
+    {
+        this.move_x = -1;
+    };
+
+    this.rightArrowDown = function()
+    {
+        this.move_x = 1;
+    };
+
+    this.upArrowUp = function()
+    {
+        this.move_y = 0;
+    };
+
+    this.downArrowUp = function()
+    {
+        this.move_y = 0;
+    };
+
+    this.leftArrowUp = function()
+    {
+        this.move_x = 0;
+    };
+
+    this.rightArrowUp = function()
+    {
+        this.move_x = 0;
+    };
+
 }
 
-function checkKey(e) {
-
+function checkKeyDown(e)
+{
     e = e || window.event;
 
     if (e.keyCode == '38')
     {
-        player.upArrow();
+        player.upArrowDown();
     }
     else if (e.keyCode == '40')
     {
-        player.downArrow();
+        player.downArrowDown();
     }
     else if (e.keyCode == '37')
     {
-       player.leftArrow();
+       player.leftArrowDown();
     }
     else if (e.keyCode == '39')
     {
-       player.rightArrow();
+       player.rightArrowDown();
     }
 }
+
+function checkKeyUp(e)
+{
+    e = e || window.event;
+
+    if (e.keyCode == '38')
+    {
+        player.upArrowUp();
+    }
+    else if (e.keyCode == '40')
+    {
+        player.downArrowUp();
+    }
+    else if (e.keyCode == '37')
+    {
+       player.leftArrowUp();
+    }
+    else if (e.keyCode == '39')
+    {
+       player.rightArrowUp();
+    }
+}
+
+
 
 function loadImage(src)
 {
@@ -141,7 +187,8 @@ function initialize()
 
     player = new Spider(bmcc);
 
-    document.onkeydown = checkKey;
+    document.onkeydown = checkKeyDown;
+    document.onkeyup = checkKeyUp;
 
     main();
 }
