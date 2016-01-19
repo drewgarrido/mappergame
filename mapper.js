@@ -31,25 +31,21 @@ var walls = [];
 
 function main()
 {
-    var num_flies = flies.length;
-    var num_walls = walls.length;
-
     // Prep offscreen buffer
     bmcc.clearRect(0,0,bmc.width, bmc.height);
 
     // Game logic
-    player.move(walls, flies);
+    player.move();
+    checkWallCollision(player, walls);
+    checkFlyCollision(player, flies);
 
     // Draw code
-    bmcc.font = "30px Arial";
-    bmcc.fillText("Hello World",100,50);
-
-    for (var i = 0; i < num_walls; i++)
+    for (var i = 0; i < walls.length; i++)
     {
         walls[i].render();
     }
 
-    for (var i = 0; i < num_flies; i++)
+    for (var i = 0; i < flies.length; i++)
     {
         flies[i].render();
     }
@@ -62,10 +58,70 @@ function main()
     requestAnimationFrame(main);
 }
 
+function checkWallCollision(p, w)
+{
+    for (var i = 0; i < w.length; i++)
+    {
+        var diff_x = Math.abs(p.x - w[i].x);
+        var diff_y = Math.abs(p.y - w[i].y);
+
+        if (diff_x < 32 && diff_y < 32)
+        {
+            if (diff_x > diff_y)
+            {
+                p.vel_x = 0;
+
+                if (p.x > w[i].x)
+                {
+                    p.x = w[i].x + w[i].side;
+                }
+                else
+                {
+                    p.x = w[i].x - p.icon.width;
+                }
+            }
+            else
+            {
+                p.vel_y = 0;
+
+                if (p.y > w[i].y)
+                {
+                    p.y = w[i].y + w[i].side;
+                }
+                else
+                {
+                    p.y = w[i].y - p.icon.height;
+                }
+            }
+        }
+    }
+}
+
+function checkFlyCollision(p, f)
+{
+    for (var i = 0; i < f.length; i++)
+    {
+        var diff_x = Math.abs(p.x - f[i].x);
+        var diff_y = Math.abs(p.y - f[i].y);
+
+        if (diff_x < 32 && diff_y < 32)
+        {
+            f.splice(i,1);
+        }
+    }
+}
+
+var Node = function(x_pa, y_pa)
+{
+    this.x = x_pa;
+    this.y = y_pa;
+    this.neighbors = [];
+    this.cost = Number.MAX_VALUE;
+    this.came_from;
+}
+
 var Spider = function(ctx_pa, width_pa, height_pa)
 {
-    this.x = 0;
-    this.y = 0;
     this.vel_x = 0;
     this.vel_y = 0;
     this.max_vel_sq = 9;    // Velocity squared, in px per frame
@@ -77,60 +133,16 @@ var Spider = function(ctx_pa, width_pa, height_pa)
     this.max_x = width_pa - this.icon.width;
     this.max_y = height_pa - this.icon.height;
     this.ctx = ctx_pa;
+    this.x = (width_pa >> 1) - (this.icon.width >> 1);
+    this.y = (height_pa >> 1) - (this.icon.height >> 1);
+    this.path = [];
 
     this.render = function()
     {
         this.ctx.drawImage(this.icon, this.x, this.y);
     };
 
-    this.move = function(wall_list, flies_list)
-    {
-        this.updateMovementVectors();
-        this.checkWallCollision(wall_list);
-
-    };
-
-    this.checkWallCollision = function(wall_list)
-    {
-        var num_walls = wall_list.length;
-        for (var i = 0; i < num_walls; i++)
-        {
-            var diff_x = Math.abs(this.x - wall_list[i].x);
-            var diff_y = Math.abs(this.y - wall_list[i].y);
-
-            if (diff_x < 32 && diff_y < 32)
-            {
-                if (diff_x > diff_y)
-                {
-                    this.vel_x = 0;
-
-                    if (this.x > wall_list[i].x)
-                    {
-                        this.x = wall_list[i].x + wall_list[i].side;
-                    }
-                    else
-                    {
-                        this.x = wall_list[i].x - this.icon.width;
-                    }
-                }
-                else
-                {
-                    this.vel_y = 0;
-
-                    if (this.y > wall_list[i].y)
-                    {
-                        this.y = wall_list[i].y + wall_list[i].side;
-                    }
-                    else
-                    {
-                        this.y = wall_list[i].y - this.icon.height;
-                    }
-                }
-            }
-        }
-    };
-
-    this.updateMovementVectors = function()
+    this.move = function()
     {
         this.vel_x += this.acc * this.cmd_x;
         this.vel_y += this.acc * this.cmd_y;
@@ -170,6 +182,11 @@ var Spider = function(ctx_pa, width_pa, height_pa)
 
         this.x = Math.min(this.max_x, Math.max(0, this.x + this.vel_x));
         this.y = Math.min(this.max_y, Math.max(0, this.y + this.vel_y));
+    }
+
+    this.updateTarget = function(f)
+    {
+
     }
 
     this.upArrowDown = function()
@@ -244,10 +261,14 @@ var Wall = function(ctx_pa, x_pa, y_pa)
 
 function checkKeyDown(e)
 {
-    var dispatch =  {'38':player.upArrowDown.bind(player),
-                     '40':player.downArrowDown.bind(player),
-                     '37':player.leftArrowDown.bind(player),
-                     '39':player.rightArrowDown.bind(player)
+    var dispatch =  {'38':player.upArrowDown.bind(player),      // Up Arrow
+                     '87':player.upArrowDown.bind(player),      // W
+                     '40':player.downArrowDown.bind(player),    // Down Arrow
+                     '83':player.downArrowDown.bind(player),    // S
+                     '37':player.leftArrowDown.bind(player),    // Left Arrow
+                     '65':player.leftArrowDown.bind(player),    // A
+                     '39':player.rightArrowDown.bind(player),   // Right Arrow
+                     '68':player.rightArrowDown.bind(player)    // D
                     };
 
     e = e || window.event;
@@ -261,10 +282,14 @@ function checkKeyDown(e)
 function checkKeyUp(e)
 {
 
-    var dispatch =  {'38':player.upArrowUp.bind(player),
-                     '40':player.downArrowUp.bind(player),
-                     '37':player.leftArrowUp.bind(player),
-                     '39':player.rightArrowUp.bind(player)
+    var dispatch =  {'38':player.upArrowUp.bind(player),        // Up Arrow
+                     '87':player.upArrowUp.bind(player),        // W
+                     '40':player.downArrowUp.bind(player),      // Down Arrow
+                     '83':player.downArrowUp.bind(player),      // S
+                     '37':player.leftArrowUp.bind(player),      // Left Arrow
+                     '65':player.leftArrowUp.bind(player),      // A
+                     '39':player.rightArrowUp.bind(player),     // Right Arrow
+                     '68':player.rightArrowUp.bind(player)      // D
                     };
 
     e = e || window.event;
@@ -289,10 +314,30 @@ function checkMouseDown(e)
     if (e.button === 0)
     {
         flies.push(new Fly(bmcc, click_x, click_y));
+        player.updateTarget(flies);
     }
-    else if (e.button == 2)
+    else if (e.button === 2)
     {
-        walls.push(new Wall(bmcc, click_x, click_y));
+        var no_wall_clicked_on = true;
+        for (var i = 0; i < walls.length; i++)
+        {
+            var diff_x = Math.abs(click_x - (walls[i].x + 16));
+            var diff_y = Math.abs(click_y - (walls[i].y + 16));
+
+            if (diff_x < 16 && diff_y < 16)
+            {
+                walls.splice(i, 1);
+                // The splice moves future arrays forward
+                // adjust i to match the next object
+                i--;
+                no_wall_clicked_on = false;
+            }
+        }
+
+        if (no_wall_clicked_on)
+        {
+            walls.push(new Wall(bmcc, click_x, click_y));
+        }
     }
 }
 
@@ -327,6 +372,44 @@ function initialize()
 
     // Disable the right click context menu
     mc.oncontextmenu = function(){return false;};
+
+    var graph = [];
+    for (var x = 0; x < 3; x++)
+    {
+        graph.push([]);
+
+        for (var y = 0; y < 3; y++)
+        {
+            graph[x].push(new Node(x,y));
+        }
+    }
+
+    for (var x = 0; x < 3; x++)
+    {
+        for (var y = 0; y < 3; y++)
+        {
+            var node = graph[x][y];
+            if (x > 0)
+            {
+                node.neighbors.push(graph[x-1][y]);
+            }
+            if (x < 2)
+            {
+                node.neighbors.push(graph[x+1][y]);
+            }
+            if (y > 0)
+            {
+                node.neighbors.push(graph[x][y+1]);
+            }
+            if (y < 2)
+            {
+                node.neighbors.push(graph[x][y-1]);
+            }
+        }
+    }
+
+    console.log(graph[0][0].neighbors[0]);
+
 
     main();
 }
