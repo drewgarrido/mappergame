@@ -26,12 +26,15 @@ var bmcc;
 
 function main()
 {
+    // Prep offscreen buffer
     bmcc.clearRect(0,0,bmc.width, bmc.height);
+
+    // Draw code
     bmcc.font = "30px Arial";
     bmcc.fillText("Hello World",100,50);
-
     player.render();
 
+    // Screen flip
     mcc.clearRect(0,0,mc.width, mc.height);
     mcc.drawImage(bmc, 0, 0);
     requestAnimationFrame(main);
@@ -41,12 +44,12 @@ var Spider = function(ctx_pa, width_pa, height_pa)
 {
     this.x = 0;
     this.y = 0;
-    this.cmd_x = 0;
-    this.cmd_y = 0;
     this.vel_x = 0;
     this.vel_y = 0;
-    this.max_vel_sq = 9;
-    this.acc = 0.05;
+    this.max_vel_sq = 9;    // Velocity squared, in px per frame
+    this.cmd_x = 0;
+    this.cmd_y = 0;
+    this.acc = 0.25;        // px per frame^2, must be > than friction!
     this.friction = 0.2;
     this.icon = loadImage("spider.png");
     this.max_x = width_pa - this.icon.width;
@@ -57,36 +60,32 @@ var Spider = function(ctx_pa, width_pa, height_pa)
     {
         this.vel_x += this.acc * this.cmd_x;
         this.vel_y += this.acc * this.cmd_y;
-        if (!this.cmd_x)
+        if (this.vel_x > this.friction)
         {
-            if (this.vel_x > this.friction)
-            {
-                this.vel_x -= this.friction;
-            }
-            else if (this.vel_x < -this.friction)
-            {
-                this.vel_x += this.friction;
-            }
-            else
-            {
-                this.vel_x = 0;
-            }
+            this.vel_x -= this.friction;
         }
-        if (!this.cmd_y)
+        else if (this.vel_x < -this.friction)
         {
-            if (this.vel_y > this.friction)
-            {
-                this.vel_y -= this.friction;
-            }
-            else if (this.vel_y < -this.friction)
-            {
-                this.vel_y += this.friction;
-            }
-            else
-            {
-                this.vel_y = 0;
-            }
+            this.vel_x += this.friction;
         }
+        else
+        {
+            this.vel_x = 0;
+        }
+
+        if (this.vel_y > this.friction)
+        {
+            this.vel_y -= this.friction;
+        }
+        else if (this.vel_y < -this.friction)
+        {
+            this.vel_y += this.friction;
+        }
+        else
+        {
+            this.vel_y = 0;
+        }
+
 
         var speed = Math.pow(this.vel_x, 2) + Math.pow(this.vel_y, 2);
         if (speed > this.max_vel_sq)
@@ -157,11 +156,11 @@ function checkKeyDown(e)
     }
     else if (e.keyCode == '37')
     {
-       player.leftArrowDown();
+        player.leftArrowDown();
     }
     else if (e.keyCode == '39')
     {
-       player.rightArrowDown();
+        player.rightArrowDown();
     }
 }
 
@@ -179,11 +178,11 @@ function checkKeyUp(e)
     }
     else if (e.keyCode == '37')
     {
-       player.leftArrowUp();
+        player.leftArrowUp();
     }
     else if (e.keyCode == '39')
     {
-       player.rightArrowUp();
+        player.rightArrowUp();
     }
 }
 
