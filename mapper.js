@@ -20,41 +20,44 @@
 
 
 
-var player;
-var mc;
-var mcc;
+var spider;
+var display_canvas;
+var display_context;
 var wall_canvas;
 var wall_context;
-var bmc;
-var bmcc;
+var buffer_canvas;
+var buffer_context;
 var fly_icon;
 var flies = [];
 var walls = [];
 var graph = [];
+var path = [];
 
 function main()
 {
     // Prep offscreen buffer
-    bmcc.clearRect(0,0,bmc.width, bmc.height);
+    buffer_context.clearRect(0,0,buffer_canvas.width, buffer_canvas.height);
 
     // Game logic
-    player.move();
-    checkWallCollision(player, walls);
-    checkFlyCollision(player, flies);
+    spider.move();
+    checkWallCollision(spider, walls);
+    checkFlyCollision(spider, flies);
 
     // Draw code
-    bmcc.drawImage(wall_canvas,0,0);
+    buffer_context.drawImage(wall_canvas,0,0);
 
     for (var i = 0; i < flies.length; i++)
     {
         flies[i].render();
     }
 
-    player.render();
+    spider.render();
+
+    drawPath();
 
     // Screen flip
-    mcc.clearRect(0,0,mc.width, mc.height);
-    mcc.drawImage(bmc, 0, 0);
+    display_context.clearRect(0,0,display_canvas.width, display_canvas.height);
+    display_context.drawImage(buffer_canvas, 0, 0);
     requestAnimationFrame(main);
 }
 
@@ -116,7 +119,9 @@ var Node = function(x_pa, y_pa)
     this.x = x_pa;
     this.y = y_pa;
     this.neighbors = [];
-    this.cost = Number.MAX_VALUE;
+    this.cost_so_far = Number.MAX_VALUE;
+    this.cost_to = 1;
+    this.connected = true;
     this.came_from;
 }
 
@@ -182,11 +187,6 @@ var Spider = function(ctx_pa, width_pa, height_pa)
 
         this.x = Math.min(this.max_x, Math.max(0, this.x + this.vel_x));
         this.y = Math.min(this.max_y, Math.max(0, this.y + this.vel_y));
-    }
-
-    this.updateTarget = function(f)
-    {
-
     }
 
     this.upArrowDown = function()
@@ -260,7 +260,7 @@ var Wall = function(ctx_pa, x_pa, y_pa)
 
 function updateWallContext()
 {
-    wall_context.clearRect(0,0,bmc.width, bmc.height);
+    wall_context.clearRect(0,0,buffer_canvas.width, buffer_canvas.height);
 
     for (var i = 0; i < walls.length; i++)
     {
@@ -268,12 +268,21 @@ function updateWallContext()
     }
 }
 
-function updateGraph()
+function initializeGraph()
 {
-    // create a fresh graph using the existing nodes
-    for (var x = 0; x < mc.width; x++)
+    for (var x = 0; x < display_canvas.width; x++)
     {
-        for (var y = 0; y < mc.height; y++)
+        graph.push([]);
+
+        for (var y = 0; y < display_canvas.height; y++)
+        {
+            graph[x].push(new Node(x,y));
+        }
+    }
+
+    for (var x = 0; x < display_canvas.width; x++)
+    {
+        for (var y = 0; y < display_canvas.height; y++)
         {
             var node = graph[x][y];
             node.neighbors = [];
@@ -281,32 +290,180 @@ function updateGraph()
             {
                 node.neighbors.push(graph[x-1][y]);
             }
-            if (x < mc.width - 1)
+            if (x < display_canvas.width - 1)
             {
                 node.neighbors.push(graph[x+1][y]);
             }
             if (y > 0)
             {
+                node.neighbors.push(graph[x][y-1]);
+            }
+            if (y < display_canvas.height - 1)
+            {
                 node.neighbors.push(graph[x][y+1]);
             }
-            if (y < mc.height - 1)
+        }
+    }
+
+    resetGraphConnections();
+}
+
+function resetGraphConnections()
+{
+    for (var x = 0; x < display_canvas.width; x++)
+    {
+        for (var y = 0; y < display_canvas.height; y++)
+        {
+            graph[x][y].connected = true;
+            graph[x][y].came_from = undefined;
+            graph[x][y].cost_so_far = Number.MAX_VALUE;
+        }
+    }
+}
+
+function resetGraphPath()
+{
+    for (var x = 0; x < display_canvas.width; x++)
+    {
+        for (var y = 0; y < display_canvas.height; y++)
+        {
+            graph[x][y].came_from = undefined;
+            graph[x][y].cost_so_far = Number.MAX_VALUE;
+        }
+    }
+}
+
+function updateGraphConnections()
+{
+    for (var i = 0; i < walls.length; i++)
+    {
+        var start_x = Math.max(0, walls[i].x - 32);
+        var start_y = Math.min(graph.length, walls[i].y - 32);
+        var end_x = Math.max(0, walls[i].x + 32);
+        var end_y = Math.min(graph[0].length, walls[i].y + 32);
+
+        for (var x = start_x; x < end_x; x++)
+        {
+            for (var y = start_y; y < end_y; y++)
             {
-                node.neighbors.push(graph[x][y-1]);
+                graph[x][y].connected = false;
             }
         }
     }
 }
 
+function dijkstra_to_closest_fly()
+{
+    var start_node = graph[(spider.x+16)|0][(spider.y+16)|0];
+    var frontier = [start_node];    // Priority queue
+    var current_node, next_node, goal_node;
+    var new_cost = 0;
+    var reverse_path = [];
+
+    if (flies.length === 0)
+    {
+        return;
+    }
+
+    resetGraphPath();
+
+    path = [];
+
+    start_node.came_from = start_node;
+    start_node.cost_so_far = 0;
+
+    while (frontier.length > 0 && goal_node === undefined)
+    {
+        current_node = frontier.shift();
+
+        for (var i = 0; i < flies.length; i++)
+        {
+            if (current_node.x === flies[i].x &&
+                current_node.y === flies[i].y)
+            {
+                goal_node = current_node;
+                break;
+            }
+        }
+
+        if (goal_node === undefined)
+        {
+            for (var k = 0; k < current_node.neighbors.length; k++)
+            {
+                next_node = current_node.neighbors[k];
+                new_cost = current_node.cost_so_far + next_node.cost_to;
+
+                if (next_node.connected &&
+                    new_cost < next_node.cost_so_far)
+                {
+                    next_node.cost_so_far = new_cost;
+
+                    for (var m = 0; m < frontier.length; m++)
+                    {
+                        if (frontier[m].cost_so_far > new_cost)
+                        {
+                            frontier.splice(m, 0, next_node);
+                            break;
+                        }
+                    }
+                    if (m === frontier.length)
+                    {
+                        frontier.push(next_node);
+                    }
+
+                    next_node.came_from = current_node;
+                }
+            }
+        }
+    }
+
+    current_node = goal_node;
+
+    while (current_node.cost_so_far !== 0)
+    {
+        reverse_path.push(current_node);
+        current_node = current_node.came_from;
+        if (current_node === undefined)
+        {
+            i = 0;
+        }
+    }
+    // Reverse the list, so index 0 is the start
+    while (reverse_path.length)
+    {
+        path.push(reverse_path.pop());
+    }
+}
+
+function drawPath()
+{
+    if (path.length !== 0)
+    {
+        buffer_context.beginPath();
+        buffer_context.lineWidth="5";
+        buffer_context.strokeStyle="green"; // Green path
+
+        buffer_context.moveTo(path[0].x, path[0].y);
+
+        for (var i = 1; i < path.length; i++)
+        {
+            buffer_context.lineTo(path[i].x,path[i].y);
+        }
+
+        buffer_context.stroke(); // Draw it
+    }
+}
+
 function checkKeyDown(e)
 {
-    var dispatch =  {'38':player.upArrowDown.bind(player),      // Up Arrow
-                     '87':player.upArrowDown.bind(player),      // W
-                     '40':player.downArrowDown.bind(player),    // Down Arrow
-                     '83':player.downArrowDown.bind(player),    // S
-                     '37':player.leftArrowDown.bind(player),    // Left Arrow
-                     '65':player.leftArrowDown.bind(player),    // A
-                     '39':player.rightArrowDown.bind(player),   // Right Arrow
-                     '68':player.rightArrowDown.bind(player)    // D
+    var dispatch =  {'38':spider.upArrowDown.bind(spider),      // Up Arrow
+                     '87':spider.upArrowDown.bind(spider),      // W
+                     '40':spider.downArrowDown.bind(spider),    // Down Arrow
+                     '83':spider.downArrowDown.bind(spider),    // S
+                     '37':spider.leftArrowDown.bind(spider),    // Left Arrow
+                     '65':spider.leftArrowDown.bind(spider),    // A
+                     '39':spider.rightArrowDown.bind(spider),   // Right Arrow
+                     '68':spider.rightArrowDown.bind(spider)    // D
                     };
 
     e = e || window.event;
@@ -320,14 +477,14 @@ function checkKeyDown(e)
 function checkKeyUp(e)
 {
 
-    var dispatch =  {'38':player.upArrowUp.bind(player),        // Up Arrow
-                     '87':player.upArrowUp.bind(player),        // W
-                     '40':player.downArrowUp.bind(player),      // Down Arrow
-                     '83':player.downArrowUp.bind(player),      // S
-                     '37':player.leftArrowUp.bind(player),      // Left Arrow
-                     '65':player.leftArrowUp.bind(player),      // A
-                     '39':player.rightArrowUp.bind(player),     // Right Arrow
-                     '68':player.rightArrowUp.bind(player)      // D
+    var dispatch =  {'38':spider.upArrowUp.bind(spider),        // Up Arrow
+                     '87':spider.upArrowUp.bind(spider),        // W
+                     '40':spider.downArrowUp.bind(spider),      // Down Arrow
+                     '83':spider.downArrowUp.bind(spider),      // S
+                     '37':spider.leftArrowUp.bind(spider),      // Left Arrow
+                     '65':spider.leftArrowUp.bind(spider),      // A
+                     '39':spider.rightArrowUp.bind(spider),     // Right Arrow
+                     '68':spider.rightArrowUp.bind(spider)      // D
                     };
 
     e = e || window.event;
@@ -346,13 +503,14 @@ function checkMouseDown(e)
 
     e = e || window.event;
 
-    click_x = e.pageX - c_off.left;
-    click_y = e.pageY - c_off.top;
+    click_x = Math.round(e.pageX - c_off.left);
+    click_y = Math.round(e.pageY - c_off.top);
 
     if (e.button === 0)
     {
-        flies.push(new Fly(bmcc, click_x, click_y));
-        player.updateTarget(flies);
+        flies.push(new Fly(buffer_context, click_x, click_y));
+
+        dijkstra_to_closest_fly();
     }
     else if (e.button === 2)
     {
@@ -378,6 +536,9 @@ function checkMouseDown(e)
         }
 
         updateWallContext();
+
+        resetGraphConnections();
+        updateGraphConnections();
     }
 }
 
@@ -394,39 +555,31 @@ function loadImage(src)
 
 function initialize()
 {
-    mc = document.getElementById("mapperCanvas");
+    display_canvas = document.getElementById("mapperCanvas");
 
-    bmc = document.createElement('canvas');
-    bmc.width = mc.width;
-    bmc.height = mc.height;
+    buffer_canvas = document.createElement('canvas');
+    buffer_canvas.width = display_canvas.width;
+    buffer_canvas.height = display_canvas.height;
 
     wall_canvas = document.createElement('canvas');
-    wall_canvas.width = mc.width;
-    wall_canvas.height = mc.height;
+    wall_canvas.width = display_canvas.width;
+    wall_canvas.height = display_canvas.height;
 
-    mcc = mc.getContext("2d");
-    bmcc = bmc.getContext("2d");
+    display_context = display_canvas.getContext("2d");
+    buffer_context = buffer_canvas.getContext("2d");
     wall_context = wall_canvas.getContext("2d");
 
-    player = new Spider(bmcc, bmc.width, bmc.height);
+    spider = new Spider(buffer_context, buffer_canvas.width, buffer_canvas.height);
     fly_icon = loadImage('fly.png');
 
     $(document).keydown(checkKeyDown);
     $(document).keyup(checkKeyUp);
-    mc.onmousedown = checkMouseDown;
+    display_canvas.onmousedown = checkMouseDown;
 
     // Disable the right click context menu
-    mc.oncontextmenu = function(){return false;};
+    display_canvas.oncontextmenu = function(){return false;};
 
-    for (var x = 0; x < mc.width; x++)
-    {
-        graph.push([]);
-
-        for (var y = 0; y < mc.height; y++)
-        {
-            graph[x].push(new Node(x,y));
-        }
-    }
+    initializeGraph();
 
     main();
 }
