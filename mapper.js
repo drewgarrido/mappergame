@@ -123,7 +123,7 @@ var Node = function(x_pa, y_pa)
     this.cost_to = 1;
     this.connected = true;
     this.came_from;
-}
+};
 
 var Spider = function(ctx_pa, width_pa, height_pa)
 {
@@ -187,7 +187,7 @@ var Spider = function(ctx_pa, width_pa, height_pa)
 
         this.x = Math.min(this.max_x, Math.max(0, this.x + this.vel_x));
         this.y = Math.min(this.max_y, Math.max(0, this.y + this.vel_y));
-    }
+    };
 
     this.upArrowDown = function()
     {
@@ -228,7 +228,7 @@ var Spider = function(ctx_pa, width_pa, height_pa)
     {
         this.cmd_x = 0;
     };
-}
+};
 
 var Fly = function(ctx_pa, x_pa, y_pa)
 {
@@ -241,7 +241,7 @@ var Fly = function(ctx_pa, x_pa, y_pa)
     {
         this.ctx.drawImage(this.icon, this.x, this.y);
     };
-}
+};
 
 var Wall = function(ctx_pa, x_pa, y_pa)
 {
@@ -256,7 +256,7 @@ var Wall = function(ctx_pa, x_pa, y_pa)
         this.ctx.fillRect(this.x, this.y, this.side, this.side);
     };
 
-}
+};
 
 function updateWallContext()
 {
@@ -270,19 +270,21 @@ function updateWallContext()
 
 function initializeGraph()
 {
-    for (var x = 0; x < display_canvas.width; x++)
+    var x, y;
+
+    for (x = 0; x < display_canvas.width; x++)
     {
         graph.push([]);
 
-        for (var y = 0; y < display_canvas.height; y++)
+        for (y = 0; y < display_canvas.height; y++)
         {
             graph[x].push(new Node(x,y));
         }
     }
 
-    for (var x = 0; x < display_canvas.width; x++)
+    for (x = 0; x < display_canvas.width; x++)
     {
-        for (var y = 0; y < display_canvas.height; y++)
+        for (y = 0; y < display_canvas.height; y++)
         {
             var node = graph[x][y];
             node.neighbors = [];
