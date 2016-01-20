@@ -23,11 +23,14 @@
 var player;
 var mc;
 var mcc;
+var wall_canvas;
+var wall_context;
 var bmc;
 var bmcc;
 var fly_icon;
 var flies = [];
 var walls = [];
+var graph = [];
 
 function main()
 {
@@ -40,10 +43,7 @@ function main()
     checkFlyCollision(player, flies);
 
     // Draw code
-    for (var i = 0; i < walls.length; i++)
-    {
-        walls[i].render();
-    }
+    bmcc.drawImage(wall_canvas,0,0);
 
     for (var i = 0; i < flies.length; i++)
     {
@@ -258,6 +258,44 @@ var Wall = function(ctx_pa, x_pa, y_pa)
 
 }
 
+function updateWallContext()
+{
+    wall_context.clearRect(0,0,bmc.width, bmc.height);
+
+    for (var i = 0; i < walls.length; i++)
+    {
+        walls[i].render();
+    }
+}
+
+function updateGraph()
+{
+    // create a fresh graph using the existing nodes
+    for (var x = 0; x < mc.width; x++)
+    {
+        for (var y = 0; y < mc.height; y++)
+        {
+            var node = graph[x][y];
+            node.neighbors = [];
+            if (x > 0)
+            {
+                node.neighbors.push(graph[x-1][y]);
+            }
+            if (x < mc.width - 1)
+            {
+                node.neighbors.push(graph[x+1][y]);
+            }
+            if (y > 0)
+            {
+                node.neighbors.push(graph[x][y+1]);
+            }
+            if (y < mc.height - 1)
+            {
+                node.neighbors.push(graph[x][y-1]);
+            }
+        }
+    }
+}
 
 function checkKeyDown(e)
 {
@@ -336,8 +374,10 @@ function checkMouseDown(e)
 
         if (no_wall_clicked_on)
         {
-            walls.push(new Wall(bmcc, click_x, click_y));
+            walls.push(new Wall(wall_context, click_x, click_y));
         }
+
+        updateWallContext();
     }
 }
 
@@ -360,8 +400,13 @@ function initialize()
     bmc.width = mc.width;
     bmc.height = mc.height;
 
+    wall_canvas = document.createElement('canvas');
+    wall_canvas.width = mc.width;
+    wall_canvas.height = mc.height;
+
     mcc = mc.getContext("2d");
     bmcc = bmc.getContext("2d");
+    wall_context = wall_canvas.getContext("2d");
 
     player = new Spider(bmcc, bmc.width, bmc.height);
     fly_icon = loadImage('fly.png');
@@ -373,43 +418,15 @@ function initialize()
     // Disable the right click context menu
     mc.oncontextmenu = function(){return false;};
 
-    var graph = [];
-    for (var x = 0; x < 3; x++)
+    for (var x = 0; x < mc.width; x++)
     {
         graph.push([]);
 
-        for (var y = 0; y < 3; y++)
+        for (var y = 0; y < mc.height; y++)
         {
             graph[x].push(new Node(x,y));
         }
     }
-
-    for (var x = 0; x < 3; x++)
-    {
-        for (var y = 0; y < 3; y++)
-        {
-            var node = graph[x][y];
-            if (x > 0)
-            {
-                node.neighbors.push(graph[x-1][y]);
-            }
-            if (x < 2)
-            {
-                node.neighbors.push(graph[x+1][y]);
-            }
-            if (y > 0)
-            {
-                node.neighbors.push(graph[x][y+1]);
-            }
-            if (y < 2)
-            {
-                node.neighbors.push(graph[x][y-1]);
-            }
-        }
-    }
-
-    console.log(graph[0][0].neighbors[0]);
-
 
     main();
 }
