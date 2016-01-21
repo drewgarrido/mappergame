@@ -1,0 +1,29 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+<head>
+	<title>Mapper</title>
+	<meta http-equiv="content-type" content="text/html;charset=utf-8" />
+	<meta name="generator" content="Geany 1.26" />
+   <script src="minmap.js"></script>
+   <script>
+   var game;
+   window.onload = function()
+      {
+         game = new MapperGame(document.getElementById("mapperCanvas"));
+         game.initialize();
+      };
+   </script>
+</head>
+
+<body>
+   <canvas id="mapperCanvas" width="600px" height="450px" style="border:1px solid black"></canvas>
+   <div>
+      Arrows or WASD move the spider.<br>
+      Left click places a fly and shows the best path.<br>
+      Right click places a wall.
+   </div>
+</body>
+
+</html>
