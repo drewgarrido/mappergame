@@ -22,20 +22,21 @@ indent_mode=2
 name=mapper
 base_path=C:\\cabinet\\data\\school\\recurse\\mapper
 description=
-file_patterns=*.js;*.css;*.html;*.htm;
+file_patterns=*.js;*.css;*.html;*.md;
 
 [long line marker]
 long_line_behaviour=1
 long_line_column=79
 
 [files]
-current_page=1
-FILE_NAME_0=334;HTML;0;EUTF-8;0;1;0;C%3A%5Ccabinet%5Cdata%5Cschool%5Crecurse%5Cmapper%5Cindex.html;0;3
-FILE_NAME_1=8114;Javascript;0;EUTF-8;0;1;0;C%3A%5Ccabinet%5Cdata%5Cschool%5Crecurse%5Cmapper%5Cmappergame.js;0;4
-FILE_NAME_2=6273;Javascript;0;EUTF-8;0;1;0;C%3A%5Ccabinet%5Cdata%5Cschool%5Crecurse%5Cmapper%5Cgrid.js;0;4
-FILE_NAME_3=1348;Javascript;0;EUTF-8;0;1;0;C%3A%5Ccabinet%5Cdata%5Cschool%5Crecurse%5Cmapper%5Cspider.js;0;4
-FILE_NAME_4=1308;Javascript;0;EUTF-8;0;1;0;C%3A%5Ccabinet%5Cdata%5Cschool%5Crecurse%5Cmapper%5Cflies.js;0;4
-FILE_NAME_5=2576;Javascript;0;EUTF-8;0;1;0;C%3A%5Ccabinet%5Cdata%5Cschool%5Crecurse%5Cmapper%5Cmaze.js;0;4
+current_page=0
+FILE_NAME_0=1032;HTML;0;EUTF-8;0;1;0;C%3A%5Ccabinet%5Cdata%5Cschool%5Crecurse%5Cmapper%5Cindex.html;0;3
+FILE_NAME_1=4796;Javascript;0;EUTF-8;0;1;0;C%3A%5Ccabinet%5Cdata%5Cschool%5Crecurse%5Cmapper%5Cmappergame.js;0;4
+FILE_NAME_2=4011;Javascript;0;EUTF-8;0;1;0;C%3A%5Ccabinet%5Cdata%5Cschool%5Crecurse%5Cmapper%5Cgrid.js;0;4
+FILE_NAME_3=3398;Javascript;0;EUTF-8;0;1;0;C%3A%5Ccabinet%5Cdata%5Cschool%5Crecurse%5Cmapper%5Cspider.js;0;4
+FILE_NAME_4=2440;Javascript;0;EUTF-8;0;1;0;C%3A%5Ccabinet%5Cdata%5Cschool%5Crecurse%5Cmapper%5Cmaze.js;0;4
+FILE_NAME_5=1630;Javascript;0;EUTF-8;0;1;0;C%3A%5Ccabinet%5Cdata%5Cschool%5Crecurse%5Cmapper%5Cfly.js;0;4
+FILE_NAME_6=1554;Javascript;0;EUTF-8;0;1;0;C%3A%5Ccabinet%5Cdata%5Cschool%5Crecurse%5Cmapper%5Cvector2d.js;0;4
 
 [prjorg]
 source_patterns=*.js;*.css;*.html;*.htm;
