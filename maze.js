@@ -24,21 +24,21 @@ var Wall = function(ctx_pa, x_pa, y_pa)
     this.half_side = (this.side >> 1);
 
     this.ctx = ctx_pa;
-    this.point = new Point_2d(x_pa, y_pa);
+    this.location = new Vector2D(x_pa, y_pa);
 
     this.render = function()
     {
-        this.ctx.fillRect(this.point.x - this.half_side,
-                          this.point.y - this.half_side,
+        this.ctx.fillRect(this.location.x - this.half_side,
+                          this.location.y - this.half_side,
                           this.side,
                           this.side);
     };
 
-    this.checkClick = function(click_point)
+    this.checkClick = function(click_location)
     {
         var result = false;
-        var diff_x = Math.abs(click_point.x - this.point.x);
-        var diff_y = Math.abs(click_point.y - this.point.y);
+        var diff_x = Math.abs(click_location.x - this.location.x);
+        var diff_y = Math.abs(click_location.y - this.location.y);
 
         if (diff_x < this.half_side && diff_y < this.half_side)
         {
@@ -66,14 +66,14 @@ var Maze = function(ctx, width, height)
         }
     };
 
-    this.processClick = function(click_point)
+    this.processClick = function(click_location)
     {
         var idx;
         var no_wall_clicked_on = true;
 
         for (idx = 0; idx < this.walls.length; idx++)
         {
-            if (this.walls[idx].checkClick(click_point))
+            if (this.walls[idx].checkClick(click_location))
             {
                 this.walls.splice(idx, 1);
                 // The splice moves future arrays forward
@@ -85,7 +85,7 @@ var Maze = function(ctx, width, height)
 
         if (no_wall_clicked_on)
         {
-            this.walls.push(new Wall(this.ctx, click_point.x, click_point.y));
+            this.walls.push(new Wall(this.ctx, click_location.x, click_location.y));
         }
     };
 };

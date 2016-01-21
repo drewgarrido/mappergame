@@ -18,25 +18,30 @@
     MA 02110-1301, USA.
 */
 
-var Point_2d = function(x_pa, y_pa)
+var Vector2D = function(x_pa, y_pa)
 {
     this.x = x_pa;
     this.y = y_pa;
 
-    this.is_equal = function(other_point)
+    this.isEqual = function(other_v)
     {
         var result = false;
-        if (this.x === other_point.x && this.y === other_point.y)
+        if (this.x === other_v.x && this.y === other_v.y)
         {
             result = true;
         }
         return result;
     };
+
+    this.round = function()
+    {
+        return (new Vector2D(Math.round(this.x), Math.round(this.y)));
+    }
 };
 
 var Node = function(x_pa, y_pa)
 {
-    this.point = new Point_2d(x_pa, y_pa);
+    this.location = new Vector2D(x_pa, y_pa);
     this.neighbors = [];
     this.cost_so_far = Number.MAX_VALUE;
     this.cost_to = 1;
@@ -163,7 +168,7 @@ var Grid = function(width_pa, height_pa)
 
             for (idx = 0; idx < goal_points.length; idx++)
             {
-                if (current_node.point.is_equal(goal_points[idx]))
+                if (current_node.location.isEqual(goal_points[idx]))
                 {
                     goal_node = current_node;
                     break;
@@ -207,7 +212,7 @@ var Grid = function(width_pa, height_pa)
 
         while (current_node.cost_so_far !== 0)
         {
-            reverse_path.push(current_node.point);
+            reverse_path.push(current_node.location);
             current_node = current_node.came_from;
         }
         // Reverse the list, so index 0 is the start

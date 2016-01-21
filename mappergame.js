@@ -52,8 +52,8 @@ var MapperGame = function(display_canvas)
         this.maze = new Maze(this.buffer_context, this.width, this.height);
         this.grid = new Grid(this.width, this.height);
 
-        $(document).keydown(this.checkKeyDown.bind(this));
-        $(document).keyup(this.checkKeyUp.bind(this));
+        document.onkeydown = this.checkKeyDown.bind(this);
+        document.onkeyup = this.checkKeyUp.bind(this);
         display_canvas.onmousedown = this.checkMouseDown.bind(this);
 
         // Disable the right click context menu
@@ -77,7 +77,7 @@ var MapperGame = function(display_canvas)
 
         for (idx = 0; idx < this.flies.length; idx++)
         {
-            if (this.flies[idx].checkCollision(this.spider.point))
+            if (this.flies[idx].checkCollision(this.spider.location))
             {
                 this.flies.splice(idx, 1);
                 idx--;
@@ -111,8 +111,8 @@ var MapperGame = function(display_canvas)
 
         for (idx = 0; idx < walls.length; idx++)
         {
-            diff_x = Math.abs(this.spider.point.x - walls[idx].point.x);
-            diff_y = Math.abs(this.spider.point.y - walls[idx].point.y);
+            diff_x = Math.abs(this.spider.location.x - walls[idx].location.x);
+            diff_y = Math.abs(this.spider.location.y - walls[idx].location.y);
 
             if (diff_x < (walls[idx].half_side + this.spider.half_width) &&
                 diff_y < (walls[idx].half_side + this.spider.half_height))
@@ -121,26 +121,26 @@ var MapperGame = function(display_canvas)
                 {
                     this.spider.vel_x = 0;
 
-                    if (this.spider.point.x > walls[idx].point.x)
+                    if (this.spider.location.x > walls[idx].location.x)
                     {
-                        this.spider.point.x = walls[idx].point.x + walls[idx].half_side + this.spider.half_width;
+                        this.spider.location.x = walls[idx].location.x + walls[idx].half_side + this.spider.half_width;
                     }
                     else
                     {
-                        this.spider.point.x = walls[idx].point.x - walls[idx].half_side - this.spider.half_width;
+                        this.spider.location.x = walls[idx].location.x - walls[idx].half_side - this.spider.half_width;
                     }
                 }
                 else
                 {
                     this.spider.vel_y = 0;
 
-                    if (this.spider.point.y > walls[idx].point.y)
+                    if (this.spider.location.y > walls[idx].location.y)
                     {
-                        this.spider.point.y = walls[idx].point.y + walls[idx].half_side + this.spider.half_height;
+                        this.spider.location.y = walls[idx].location.y + walls[idx].half_side + this.spider.half_height;
                     }
                     else
                     {
-                        this.spider.point.y = walls[idx].point.y - walls[idx].half_side - this.spider.half_height;
+                        this.spider.location.y = walls[idx].location.y - walls[idx].half_side - this.spider.half_height;
                     }
                 }
             }
@@ -212,17 +212,17 @@ var MapperGame = function(display_canvas)
 
     this.checkMouseDown = function(e)
     {
-        var c_off = $(this.display_canvas).offset();
+        var c_off = this.display_canvas;
         var click_x;
         var click_y;
         var idx;
-        var goal_points = [];
-        var wall_points = [];
+        var goal_locations = [];
+        var wall_locations = [];
 
         e = e || window.event;
 
-        click_x = Math.round(e.pageX - c_off.left);
-        click_y = Math.round(e.pageY - c_off.top);
+        click_x = Math.round(e.offsetX);
+        click_y = Math.round(e.offsetY);
 
         if (e.button === 0)
         {
@@ -230,14 +230,14 @@ var MapperGame = function(display_canvas)
 
             for (idx = 0; idx < this.flies.length; idx++)
             {
-                goal_points.push(this.flies[idx].point);
+                goal_locations.push(this.flies[idx].location);
             }
 
-            this.path = this.grid.dijkstra_to_closest_goal(this.spider.point, goal_points);
+            this.path = this.grid.dijkstra_to_closest_goal(this.spider.location.round(), goal_locations);
         }
         else if (e.button === 2)
         {
-            this.maze.processClick(new Point_2d(click_x, click_y));
+            this.maze.processClick(new Vector2D(click_x, click_y));
 
             this.maze.render();
 
@@ -245,9 +245,9 @@ var MapperGame = function(display_canvas)
 
             for (idx = 0; idx < this.maze.walls.length; idx++)
             {
-                wall_points.push(this.maze.walls[idx].point);
+                wall_points.push(this.maze.walls[idx].location);
             }
-            this.grid.updateGridConnections(wall_points);
+            this.grid.updateGridConnections(wall_locations);
         }
     };
 };

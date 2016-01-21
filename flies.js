@@ -21,7 +21,7 @@
 var Fly = function(ctx_pa, x_pa, y_pa, icon)
 {
     this.ctx = ctx_pa;
-    this.point = new Point_2d(x_pa, y_pa);
+    this.location = new Vector2D(x_pa, y_pa);
     this.icon = icon;
     this.width = icon.width;
     this.height = icon.height;
@@ -31,14 +31,14 @@ var Fly = function(ctx_pa, x_pa, y_pa, icon)
     this.render = function()
     {
         this.ctx.drawImage(this.icon,
-                           this.point.x - this.half_width,
-                           this.point.y - this.half_height);
+                           this.location.x - this.half_width,
+                           this.location.y - this.half_height);
     };
 
-    this.checkCollision = function(other_point)
+    this.checkCollision = function(other_location)
     {
-        var diff_x = Math.abs(other_point.x - this.point.x);
-        var diff_y = Math.abs(other_point.y - this.point.y);
+        var diff_x = Math.abs(other_location.x - this.location.x);
+        var diff_y = Math.abs(other_location.y - this.location.y);
         var result = false;
 
         if (diff_x < 32 && diff_y < 32)

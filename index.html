@@ -6,7 +6,6 @@
 	<title>Mapper</title>
 	<meta http-equiv="content-type" content="text/html;charset=utf-8" />
 	<meta name="generator" content="Geany 1.26" />
-   <script src="jquery-2.2.0.js"></script>
    <script src="grid.js"></script>
    <script src="maze.js"></script>
    <script src="flies.js"></script>
@@ -14,12 +13,11 @@
    <script src="mappergame.js"></script>
    <script>
    var game;
-   $(document).ready(function()
+   window.onload = function()
       {
          game = new MapperGame(document.getElementById("mapperCanvas"));
          game.initialize();
-      }
-   );
+      };
    </script>
 </head>
 

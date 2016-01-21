@@ -30,12 +30,12 @@ long_line_column=79
 
 [files]
 current_page=1
-FILE_NAME_0=666;HTML;0;EUTF-8;0;1;0;C%3A%5Ccabinet%5Cdata%5Cschool%5Crecurse%5Cmapper%5Cindex.html;0;3
-FILE_NAME_1=1512;Javascript;0;EUTF-8;0;1;0;C%3A%5Ccabinet%5Cdata%5Cschool%5Crecurse%5Cmapper%5Cmappergame.js;0;4
-FILE_NAME_2=1110;Javascript;0;EUTF-8;0;1;0;C%3A%5Ccabinet%5Cdata%5Cschool%5Crecurse%5Cmapper%5Cgrid.js;0;4
-FILE_NAME_3=2763;Javascript;0;EUTF-8;0;1;0;C%3A%5Ccabinet%5Cdata%5Cschool%5Crecurse%5Cmapper%5Cspider.js;0;4
-FILE_NAME_4=1324;Javascript;0;EUTF-8;0;1;0;C%3A%5Ccabinet%5Cdata%5Cschool%5Crecurse%5Cmapper%5Cflies.js;0;4
-FILE_NAME_5=3861;Javascript;0;EUTF-8;0;1;0;C%3A%5Ccabinet%5Cdata%5Cschool%5Crecurse%5Cmapper%5Cmaze.js;0;4
+FILE_NAME_0=334;HTML;0;EUTF-8;0;1;0;C%3A%5Ccabinet%5Cdata%5Cschool%5Crecurse%5Cmapper%5Cindex.html;0;3
+FILE_NAME_1=8114;Javascript;0;EUTF-8;0;1;0;C%3A%5Ccabinet%5Cdata%5Cschool%5Crecurse%5Cmapper%5Cmappergame.js;0;4
+FILE_NAME_2=6273;Javascript;0;EUTF-8;0;1;0;C%3A%5Ccabinet%5Cdata%5Cschool%5Crecurse%5Cmapper%5Cgrid.js;0;4
+FILE_NAME_3=1348;Javascript;0;EUTF-8;0;1;0;C%3A%5Ccabinet%5Cdata%5Cschool%5Crecurse%5Cmapper%5Cspider.js;0;4
+FILE_NAME_4=1308;Javascript;0;EUTF-8;0;1;0;C%3A%5Ccabinet%5Cdata%5Cschool%5Crecurse%5Cmapper%5Cflies.js;0;4
+FILE_NAME_5=2576;Javascript;0;EUTF-8;0;1;0;C%3A%5Ccabinet%5Cdata%5Cschool%5Crecurse%5Cmapper%5Cmaze.js;0;4
 
 [prjorg]
 source_patterns=*.js;*.css;*.html;*.htm;
@@ -50,7 +50,7 @@ EX_00_LB=_Execute
 EX_00_CM=index.html
 EX_00_WD=%p
 JavascriptFT_02_LB=_Lint
-JavascriptFT_02_CM=jsl conf jsl.drew.conf
-JavascriptFT_02_WD=%p\\jsl-0.3.0
+JavascriptFT_02_CM=jsl conf jsl.mapper.conf
+JavascriptFT_02_WD=%p
 filetypes=Javascript;
 Javascripterror_regex=([^:]+):([0-9]+):
