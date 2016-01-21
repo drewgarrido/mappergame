@@ -33,15 +33,13 @@ var Spider = function(ctx_pa, icon, width_pa, height_pa)
     this.max_x = width_pa - this.half_width;
     this.max_y = height_pa - this.half_height;
     this.ctx = ctx_pa;
-    this.x = (width_pa >> 1);
-    this.y = (height_pa >> 1);
-    this.path = [];
+    this.point = new Point_2d((width_pa >> 1), (height_pa >> 1));
 
     this.render = function()
     {
         this.ctx.drawImage(this.icon,
-                           this.x - this.half_width,
-                           this.y - this.half_height);
+                           this.point.x - this.half_width,
+                           this.point.y - this.half_height);
     };
 
     this.move = function()
@@ -82,8 +80,8 @@ var Spider = function(ctx_pa, icon, width_pa, height_pa)
             this.vel_y *= scale;
         }
 
-        this.x = Math.min(this.max_x, Math.max(this.half_width, this.x + this.vel_x));
-        this.y = Math.min(this.max_y, Math.max(this.half_height, this.y + this.vel_y));
+        this.point.x = Math.min(this.max_x, Math.max(this.half_width, this.point.x + this.vel_x));
+        this.point.y = Math.min(this.max_y, Math.max(this.half_height, this.point.y + this.vel_y));
     };
 
     this.upArrowDown = function()

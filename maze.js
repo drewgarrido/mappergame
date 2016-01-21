@@ -37,8 +37,8 @@ var Wall = function(ctx_pa, x_pa, y_pa)
     this.checkClick = function(click_point)
     {
         var result = false;
-        var diff_x = Math.abs(click_point.x - (this.walls[idx].x + this.half_side));
-        var diff_y = Math.abs(click_point.y - (this.walls[idx].y + this.half_side));
+        var diff_x = Math.abs(click_point.x - this.point.x);
+        var diff_y = Math.abs(click_point.y - this.point.y);
 
         if (diff_x < this.half_side && diff_y < this.half_side)
         {
@@ -46,7 +46,7 @@ var Wall = function(ctx_pa, x_pa, y_pa)
         }
 
         return result;
-    }
+    };
 };
 
 var Maze = function(ctx, width, height)
@@ -58,65 +58,22 @@ var Maze = function(ctx, width, height)
     {
         var idx;
 
-        this.ctx.clearRect(0,0,this.width, this.height);
+        this.ctx.clearRect(0, 0, this.width, this.height);
 
-        for (idx = 0; idx < walls.length; idx++)
+        for (idx = 0; idx < this.walls.length; idx++)
         {
-            walls[idx].render();
+            this.walls[idx].render();
         }
     };
-
-    function checkWallCollision(p)
-    {
-        var diff_x, diff_y;
-        var idx;
-
-        for (idx = 0; idx < w.length; idx++)
-        {
-            diff_x = Math.abs(p.x - walls[idx].point.x);
-            diff_y = Math.abs(p.y - walls[idx].point.y);
-
-            if (diff_x < 32 && diff_y < 32)
-            {
-                if (diff_x > diff_y)
-                {
-                    p.vel_x = 0;
-
-                    if (p.x > walls[idx].point.x)
-                    {
-                        p.x = walls[idx].point.x + walls[idx].side;
-                    }
-                    else
-                    {
-                        p.x = walls[idx].point.x - p.icon.width;
-                    }
-                }
-                else
-                {
-                    p.vel_y = 0;
-
-                    if (p.y > walls[idx].point.y)
-                    {
-                        p.y = walls[idx].point.y + walls[idx].side;
-                    }
-                    else
-                    {
-                        p.y = walls[idx].point.y - p.icon.height;
-                    }
-                }
-            }
-        }
-        return p;
-    }
 
     this.processClick = function(click_point)
     {
         var idx;
         var no_wall_clicked_on = true;
 
-        for (idx = 0; idx < walls.length; idx++)
+        for (idx = 0; idx < this.walls.length; idx++)
         {
-            if (walls[idx].checkClick(click_point))
+            if (this.walls[idx].checkClick(click_point))
             {
                 this.walls.splice(idx, 1);
                 // The splice moves future arrays forward
@@ -128,10 +85,10 @@ var Maze = function(ctx, width, height)
 
         if (no_wall_clicked_on)
         {
-            this.walls.push(new Wall(wall_context, click_point.x, click_point.y));
+            this.walls.push(new Wall(this.ctx, click_point.x, click_point.y));
         }
-    }
-}
+    };
+};
 
 
 

@@ -25,14 +25,14 @@ var Point_2d = function(x_pa, y_pa)
 
     this.is_equal = function(other_point)
     {
-        result = false;
+        var result = false;
         if (this.x === other_point.x && this.y === other_point.y)
         {
             result = true;
         }
         return result;
-    }
-}
+    };
+};
 
 var Node = function(x_pa, y_pa)
 {
@@ -72,19 +72,19 @@ var Grid = function(width_pa, height_pa)
                 node.neighbors = [];
                 if (x > 0)
                 {
-                    node.neighbors.push(nodes[x-1][y]);
+                    node.neighbors.push(this.nodes[x-1][y]);
                 }
-                if (x < display_canvas.width - 1)
+                if (x < this.width - 1)
                 {
-                    node.neighbors.push(nodes[x+1][y]);
+                    node.neighbors.push(this.nodes[x+1][y]);
                 }
                 if (y > 0)
                 {
-                    node.neighbors.push(nodes[x][y-1]);
+                    node.neighbors.push(this.nodes[x][y-1]);
                 }
-                if (y < display_canvas.height - 1)
+                if (y < this.height - 1)
                 {
-                    node.neighbors.push(nodes[x][y+1]);
+                    node.neighbors.push(this.nodes[x][y+1]);
                 }
             }
         }
@@ -145,7 +145,7 @@ var Grid = function(width_pa, height_pa)
 
     this.dijkstra_to_closest_goal = function(start_point, goal_points)
     {
-        var start_node = nodes[start_point.x][start_point.y];
+        var start_node = this.nodes[start_point.x][start_point.y];
         var frontier = [start_node];    // Priority queue
         var current_node, next_node, goal_node;
         var new_cost = 0;
@@ -153,7 +153,7 @@ var Grid = function(width_pa, height_pa)
         var path = [];
         var idx, neigh_idx;
 
-        resetGridPath();
+        this.resetGridPath();
 
         start_node.cost_so_far = 0;
 
@@ -161,7 +161,7 @@ var Grid = function(width_pa, height_pa)
         {
             current_node = frontier.shift();
 
-            for (idx = 0; idx < goal_coords.length; idx++)
+            for (idx = 0; idx < goal_points.length; idx++)
             {
                 if (current_node.point.is_equal(goal_points[idx]))
                 {

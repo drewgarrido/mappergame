@@ -40,26 +40,21 @@ var MapperGame = function(display_canvas)
         this.buffer_canvas.width = this.width;
         this.buffer_canvas.height = this.height;
 
-        this.wall_canvas = document.createElement('canvas');
-        this.wall_canvas.width = this.width;
-        this.wall_canvas.height = this.height;
-
         this.display_context = this.display_canvas.getContext("2d");
         this.buffer_context = this.buffer_canvas.getContext("2d");
-        this.wall_context = this.wall_canvas.getContext("2d");
 
-        this.spider = new Spider(buffer_context,
+        this.spider = new Spider(this.buffer_context,
                                  loadImage('spider.png'),
                                  this.width,
                                  this.height);
 
         this.fly_icon = loadImage('fly.png');
-        this.maze = new Maze(buffer_context, this.width, this.height);
+        this.maze = new Maze(this.buffer_context, this.width, this.height);
         this.grid = new Grid(this.width, this.height);
 
-        $(document).keydown(this.checkKeyDown);
-        $(document).keyup(this.checkKeyUp);
-        display_canvas.onmousedown = this.checkMouseDown;
+        $(document).keydown(this.checkKeyDown.bind(this));
+        $(document).keyup(this.checkKeyUp.bind(this));
+        display_canvas.onmousedown = this.checkMouseDown.bind(this);
 
         // Disable the right click context menu
         this.display_canvas.oncontextmenu = function(){return false;};
@@ -71,62 +66,119 @@ var MapperGame = function(display_canvas)
 
     this.render_loop = function()
     {
+        var idx;
+
         // Prep offscreen buffer
-        buffer_context.clearRect(0,0,buffer_canvas.width, buffer_canvas.height);
+        this.buffer_context.clearRect(0,0,this.width, this.height);
 
         // Game logic
-        spider.move();
-        checkWallCollision(spider, walls);
-        checkFlyCollision(spider, flies);
+        this.spider.move();
+        this.checkWallCollision();
 
-        // Draw code
-        buffer_context.drawImage(wall_canvas,0,0);
-
-        for (var i = 0; i < flies.length; i++)
+        for (idx = 0; idx < this.flies.length; idx++)
         {
-            flies[i].render();
+            if (this.flies[idx].checkCollision(this.spider.point))
+            {
+                this.flies.splice(idx, 1);
+                idx--;
+            }
         }
 
-        spider.render();
+        // Draw code
+        this.maze.render();
 
-        drawPath();
+        for (idx = 0; idx < this.flies.length; idx++)
+        {
+            this.flies[idx].render();
+        }
+
+        this.spider.render();
+
+        this.drawPath();
 
         // Screen flip
-        display_context.clearRect(0,0,display_canvas.width, display_canvas.height);
-        display_context.drawImage(buffer_canvas, 0, 0);
-        requestAnimationFrame(this.render_loop);
+        this.display_context.clearRect(0,0,this.width, this.height);
+        this.display_context.drawImage(this.buffer_canvas, 0, 0);
+        requestAnimationFrame(this.render_loop.bind(this));
     };
 
 
-    this.drawPath = function(path)
+    this.checkWallCollision = function()
     {
-        if (path.length !== 0)
+        var walls = this.maze.walls;
+        var diff_x, diff_y;
+        var idx;
+
+        for (idx = 0; idx < walls.length; idx++)
         {
-            buffer_context.beginPath();
-            buffer_context.lineWidth="5";
-            buffer_context.strokeStyle="green"; // Green path
+            diff_x = Math.abs(this.spider.point.x - walls[idx].point.x);
+            diff_y = Math.abs(this.spider.point.y - walls[idx].point.y);
 
-            buffer_context.moveTo(path[0].x, path[0].y);
-
-            for (var i = 1; i < path.length; i++)
+            if (diff_x < (walls[idx].half_side + this.spider.half_width) &&
+                diff_y < (walls[idx].half_side + this.spider.half_height))
             {
-                buffer_context.lineTo(path[i].x,path[i].y);
+                if (diff_x > diff_y)
+                {
+                    this.spider.vel_x = 0;
+
+                    if (this.spider.point.x > walls[idx].point.x)
+                    {
+                        this.spider.point.x = walls[idx].point.x + walls[idx].half_side + this.spider.half_width;
+                    }
+                    else
+                    {
+                        this.spider.point.x = walls[idx].point.x - walls[idx].half_side - this.spider.half_width;
+                    }
+                }
+                else
+                {
+                    this.spider.vel_y = 0;
+
+                    if (this.spider.point.y > walls[idx].point.y)
+                    {
+                        this.spider.point.y = walls[idx].point.y + walls[idx].half_side + this.spider.half_height;
+                    }
+                    else
+                    {
+                        this.spider.point.y = walls[idx].point.y - walls[idx].half_side - this.spider.half_height;
+                    }
+                }
+            }
+        }
+    };
+
+
+    this.drawPath = function()
+    {
+        var idx;
+
+        if (this.path.length !== 0)
+        {
+            this.buffer_context.beginPath();
+            this.buffer_context.lineWidth="5";
+            this.buffer_context.strokeStyle="green";
+
+            this.buffer_context.moveTo(this.path[0].x, this.path[0].y);
+
+            for (idx = 1; idx < this.path.length; idx++)
+            {
+                this.buffer_context.lineTo(this.path[idx].x, this.path[idx].y);
             }
 
-            buffer_context.stroke(); // Draw it
+            this.buffer_context.stroke(); // Draw it
         }
     };
 
     this.checkKeyDown = function(e)
     {
-        var dispatch =  {'38':spider.upArrowDown.bind(spider),      // Up Arrow
-                         '87':spider.upArrowDown.bind(spider),      // W
-                         '40':spider.downArrowDown.bind(spider),    // Down Arrow
-                         '83':spider.downArrowDown.bind(spider),    // S
-                         '37':spider.leftArrowDown.bind(spider),    // Left Arrow
-                         '65':spider.leftArrowDown.bind(spider),    // A
-                         '39':spider.rightArrowDown.bind(spider),   // Right Arrow
-                         '68':spider.rightArrowDown.bind(spider)    // D
+        var dispatch =  {'38':this.spider.upArrowDown.bind(this.spider),      // Up Arrow
+                         '87':this.spider.upArrowDown.bind(this.spider),      // W
+                         '40':this.spider.downArrowDown.bind(this.spider),    // Down Arrow
+                         '83':this.spider.downArrowDown.bind(this.spider),    // S
+                         '37':this.spider.leftArrowDown.bind(this.spider),    // Left Arrow
+                         '65':this.spider.leftArrowDown.bind(this.spider),    // A
+                         '39':this.spider.rightArrowDown.bind(this.spider),   // Right Arrow
+                         '68':this.spider.rightArrowDown.bind(this.spider)    // D
                         };
 
         e = e || window.event;
@@ -140,14 +192,14 @@ var MapperGame = function(display_canvas)
     this.checkKeyUp = function(e)
     {
 
-        var dispatch =  {'38':spider.upArrowUp.bind(spider),        // Up Arrow
-                         '87':spider.upArrowUp.bind(spider),        // W
-                         '40':spider.downArrowUp.bind(spider),      // Down Arrow
-                         '83':spider.downArrowUp.bind(spider),      // S
-                         '37':spider.leftArrowUp.bind(spider),      // Left Arrow
-                         '65':spider.leftArrowUp.bind(spider),      // A
-                         '39':spider.rightArrowUp.bind(spider),     // Right Arrow
-                         '68':spider.rightArrowUp.bind(spider)      // D
+        var dispatch =  {'38':this.spider.upArrowUp.bind(this.spider),        // Up Arrow
+                         '87':this.spider.upArrowUp.bind(this.spider),        // W
+                         '40':this.spider.downArrowUp.bind(this.spider),      // Down Arrow
+                         '83':this.spider.downArrowUp.bind(this.spider),      // S
+                         '37':this.spider.leftArrowUp.bind(this.spider),      // Left Arrow
+                         '65':this.spider.leftArrowUp.bind(this.spider),      // A
+                         '39':this.spider.rightArrowUp.bind(this.spider),     // Right Arrow
+                         '68':this.spider.rightArrowUp.bind(this.spider)      // D
                         };
 
         e = e || window.event;
@@ -160,11 +212,12 @@ var MapperGame = function(display_canvas)
 
     this.checkMouseDown = function(e)
     {
-        var c_off = $(this).offset();
+        var c_off = $(this.display_canvas).offset();
         var click_x;
         var click_y;
         var idx;
-        var goal_points = []
+        var goal_points = [];
+        var wall_points = [];
 
         e = e || window.event;
 
@@ -173,23 +226,28 @@ var MapperGame = function(display_canvas)
 
         if (e.button === 0)
         {
-            this.flies.push(new Fly(buffer_context, click_x, click_y));
+            this.flies.push(new Fly(this.buffer_context, click_x, click_y, this.fly_icon));
 
-            for (idx = 0; idx < flies.length; idx++)
+            for (idx = 0; idx < this.flies.length; idx++)
             {
-                goal_points.push(flies[i].point);
+                goal_points.push(this.flies[idx].point);
             }
 
-            this.path = maze.dijkstra_to_closest_goal(spider.point, goal_points);
+            this.path = this.grid.dijkstra_to_closest_goal(this.spider.point, goal_points);
         }
         else if (e.button === 2)
         {
-            maze.processClick(new Point_2d(click_x, click_y));
+            this.maze.processClick(new Point_2d(click_x, click_y));
 
-            maze.render();
+            this.maze.render();
 
-            resetGraphConnections();
-            updateGraphConnections();
+            this.grid.resetGridConnections();
+
+            for (idx = 0; idx < this.maze.walls.length; idx++)
+            {
+                wall_points.push(this.maze.walls[idx].point);
+            }
+            this.grid.updateGridConnections(wall_points);
         }
     };
 };
