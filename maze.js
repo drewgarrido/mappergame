@@ -18,29 +18,29 @@
     MA 02110-1301, USA.
 */
 
-var Wall = function(ctx_pa, x_pa, y_pa)
+var Wall = function(ctxp, locationp)
 {
     this.side = 32;
-    this.half_side = (this.side >> 1);
+    this.halfSide = (this.side >> 1);
 
-    this.ctx = ctx_pa;
-    this.location = new Vector2D(x_pa, y_pa);
+    this.ctx = ctxp;
+    this.location = locationp;
 
     this.render = function()
     {
-        this.ctx.fillRect(this.location.x - this.half_side,
-                          this.location.y - this.half_side,
+        this.ctx.fillRect(this.location.x - this.halfSide,
+                          this.location.y - this.halfSide,
                           this.side,
                           this.side);
     };
 
-    this.checkClick = function(click_location)
+    this.checkClick = function(clickLocation)
     {
         var result = false;
-        var diff_x = Math.abs(click_location.x - this.location.x);
-        var diff_y = Math.abs(click_location.y - this.location.y);
+        var diffX = Math.abs(clickLocation.x - this.location.x);
+        var diffY = Math.abs(clickLocation.y - this.location.y);
 
-        if (diff_x < this.half_side && diff_y < this.half_side)
+        if (diffX < this.halfSide && diffY < this.halfSide)
         {
             result = true;
         }
@@ -66,26 +66,26 @@ var Maze = function(ctx, width, height)
         }
     };
 
-    this.processClick = function(click_location)
+    this.processClick = function(clickLocation)
     {
         var idx;
-        var no_wall_clicked_on = true;
+        var noWallClickedOn = true;
 
         for (idx = 0; idx < this.walls.length; idx++)
         {
-            if (this.walls[idx].checkClick(click_location))
+            if (this.walls[idx].checkClick(clickLocation))
             {
                 this.walls.splice(idx, 1);
                 // The splice moves future arrays forward
                 // adjust i to match the next object
                 idx--;
-                no_wall_clicked_on = false;
+                noWallClickedOn = false;
             }
         }
 
-        if (no_wall_clicked_on)
+        if (noWallClickedOn)
         {
-            this.walls.push(new Wall(this.ctx, click_location.x, click_location.y));
+            this.walls.push(new Wall(this.ctx, clickLocation));
         }
     };
 };

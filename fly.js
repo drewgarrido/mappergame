@@ -18,30 +18,30 @@
     MA 02110-1301, USA.
 */
 
-var Fly = function(ctx_pa, x_pa, y_pa, icon)
+var Fly = function(ctxp, locationp, iconp)
 {
-    this.ctx = ctx_pa;
-    this.location = new Vector2D(x_pa, y_pa);
-    this.icon = icon;
-    this.width = icon.width;
-    this.height = icon.height;
-    this.half_width = (icon.width >> 1);
-    this.half_height = (icon.height >> 1);
+    this.ctx = ctxp;
+    this.location = locationp;
+    this.icon = iconp;
+    this.width = this.icon.width;
+    this.height = this.icon.height;
+    this.halfWidth = (this.icon.width >> 1);
+    this.halfHeight = (this.icon.height >> 1);
 
     this.render = function()
     {
         this.ctx.drawImage(this.icon,
-                           this.location.x - this.half_width,
-                           this.location.y - this.half_height);
+                           this.location.x - this.halfWidth,
+                           this.location.y - this.halfHeight);
     };
 
-    this.checkCollision = function(other_location)
+    this.checkCollision = function(otherLocation)
     {
-        var diff_x = Math.abs(other_location.x - this.location.x);
-        var diff_y = Math.abs(other_location.y - this.location.y);
+        var diffX = Math.abs(otherLocation.x - this.location.x);
+        var diffY = Math.abs(otherLocation.y - this.location.y);
         var result = false;
 
-        if (diff_x < 32 && diff_y < 32)
+        if (diffX < this.halfWidth && diffY < this.halfHeight)
         {
             result = true;
         }

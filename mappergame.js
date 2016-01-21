@@ -18,17 +18,17 @@
     MA 02110-1301, USA.
 */
 
-var MapperGame = function(display_canvas)
+var MapperGame = function(displayCanvas)
 {
-    this.display_canvas = display_canvas;
-    this.display_context;
-    this.buffer_canvas;
-    this.buffer_context;
-    this.width = display_canvas.width;
-    this.height = display_canvas.height;
+    this.displayCanvas = displayCanvas;
+    this.displayContext;
+    this.bufferCanvas;
+    this.bufferContext;
+    this.width = displayCanvas.width;
+    this.height = displayCanvas.height;
 
     this.spider;
-    this.fly_icon;
+    this.flyIcon;
     this.flies = [];
     this.maze;
     this.grid;
@@ -36,40 +36,40 @@ var MapperGame = function(display_canvas)
 
     this.initialize = function()
     {
-        this.buffer_canvas = document.createElement('canvas');
-        this.buffer_canvas.width = this.width;
-        this.buffer_canvas.height = this.height;
+        this.bufferCanvas = document.createElement('canvas');
+        this.bufferCanvas.width = this.width;
+        this.bufferCanvas.height = this.height;
 
-        this.display_context = this.display_canvas.getContext("2d");
-        this.buffer_context = this.buffer_canvas.getContext("2d");
+        this.displayContext = this.displayCanvas.getContext("2d");
+        this.bufferContext = this.bufferCanvas.getContext("2d");
 
-        this.spider = new Spider(this.buffer_context,
+        this.spider = new Spider(this.bufferContext,
                                  loadImage('spider.png'),
                                  this.width,
                                  this.height);
 
-        this.fly_icon = loadImage('fly.png');
-        this.maze = new Maze(this.buffer_context, this.width, this.height);
+        this.flyIcon = loadImage('fly.png');
+        this.maze = new Maze(this.bufferContext, this.width, this.height);
         this.grid = new Grid(this.width, this.height);
 
         document.onkeydown = this.checkKeyDown.bind(this);
         document.onkeyup = this.checkKeyUp.bind(this);
-        display_canvas.onmousedown = this.checkMouseDown.bind(this);
+        displayCanvas.onmousedown = this.checkMouseDown.bind(this);
 
         // Disable the right click context menu
-        this.display_canvas.oncontextmenu = function(){return false;};
+        this.displayCanvas.oncontextmenu = function(){return false;};
 
         this.grid.initializeGrid();
 
-        this.render_loop();
+        this.renderLoop();
     };
 
-    this.render_loop = function()
+    this.renderLoop = function()
     {
         var idx;
 
         // Prep offscreen buffer
-        this.buffer_context.clearRect(0,0,this.width, this.height);
+        this.bufferContext.clearRect(0,0,this.width, this.height);
 
         // Game logic
         this.spider.move();
@@ -97,50 +97,50 @@ var MapperGame = function(display_canvas)
         this.drawPath();
 
         // Screen flip
-        this.display_context.clearRect(0,0,this.width, this.height);
-        this.display_context.drawImage(this.buffer_canvas, 0, 0);
-        requestAnimationFrame(this.render_loop.bind(this));
+        this.displayContext.clearRect(0,0,this.width, this.height);
+        this.displayContext.drawImage(this.bufferCanvas, 0, 0);
+        requestAnimationFrame(this.renderLoop.bind(this));
     };
 
 
     this.checkWallCollision = function()
     {
         var walls = this.maze.walls;
-        var diff_x, diff_y;
+        var diffX, diffY;
         var idx;
 
         for (idx = 0; idx < walls.length; idx++)
         {
-            diff_x = Math.abs(this.spider.location.x - walls[idx].location.x);
-            diff_y = Math.abs(this.spider.location.y - walls[idx].location.y);
+            diffX = Math.abs(this.spider.location.x - walls[idx].location.x);
+            diffY = Math.abs(this.spider.location.y - walls[idx].location.y);
 
-            if (diff_x < (walls[idx].half_side + this.spider.half_width) &&
-                diff_y < (walls[idx].half_side + this.spider.half_height))
+            if (diffX < (walls[idx].halfSide + this.spider.halfWidth) &&
+                diffY < (walls[idx].halfSide + this.spider.halfHeight))
             {
-                if (diff_x > diff_y)
+                if (diffX > diffY)
                 {
-                    this.spider.vel_x = 0;
+                    this.spider.velocity.x = 0;
 
                     if (this.spider.location.x > walls[idx].location.x)
                     {
-                        this.spider.location.x = walls[idx].location.x + walls[idx].half_side + this.spider.half_width;
+                        this.spider.location.x = walls[idx].location.x + walls[idx].halfSide + this.spider.halfWidth;
                     }
                     else
                     {
-                        this.spider.location.x = walls[idx].location.x - walls[idx].half_side - this.spider.half_width;
+                        this.spider.location.x = walls[idx].location.x - walls[idx].halfSide - this.spider.halfWidth;
                     }
                 }
                 else
                 {
-                    this.spider.vel_y = 0;
+                    this.spider.velocity.y = 0;
 
                     if (this.spider.location.y > walls[idx].location.y)
                     {
-                        this.spider.location.y = walls[idx].location.y + walls[idx].half_side + this.spider.half_height;
+                        this.spider.location.y = walls[idx].location.y + walls[idx].halfSide + this.spider.halfHeight;
                     }
                     else
                     {
-                        this.spider.location.y = walls[idx].location.y - walls[idx].half_side - this.spider.half_height;
+                        this.spider.location.y = walls[idx].location.y - walls[idx].halfSide - this.spider.halfHeight;
                     }
                 }
             }
@@ -154,18 +154,18 @@ var MapperGame = function(display_canvas)
 
         if (this.path.length !== 0)
         {
-            this.buffer_context.beginPath();
-            this.buffer_context.lineWidth="5";
-            this.buffer_context.strokeStyle="green";
+            this.bufferContext.beginPath();
+            this.bufferContext.lineWidth="5";
+            this.bufferContext.strokeStyle="green";
 
-            this.buffer_context.moveTo(this.path[0].x, this.path[0].y);
+            this.bufferContext.moveTo(this.path[0].x, this.path[0].y);
 
             for (idx = 1; idx < this.path.length; idx++)
             {
-                this.buffer_context.lineTo(this.path[idx].x, this.path[idx].y);
+                this.bufferContext.lineTo(this.path[idx].x, this.path[idx].y);
             }
 
-            this.buffer_context.stroke(); // Draw it
+            this.bufferContext.stroke(); // Draw it
         }
     };
 
@@ -212,32 +212,29 @@ var MapperGame = function(display_canvas)
 
     this.checkMouseDown = function(e)
     {
-        var c_off = this.display_canvas;
-        var click_x;
-        var click_y;
+        var clickLocation = new Vector2D(e.offsetX, e.offsetY);
         var idx;
-        var goal_locations = [];
-        var wall_locations = [];
+        var goalLocations = [];
+        var wallLocations = [];
 
         e = e || window.event;
 
-        click_x = Math.round(e.offsetX);
-        click_y = Math.round(e.offsetY);
+        clickLocation = clickLocation.round();
 
         if (e.button === 0)
         {
-            this.flies.push(new Fly(this.buffer_context, click_x, click_y, this.fly_icon));
+            this.flies.push(new Fly(this.bufferContext, clickLocation, this.flyIcon));
 
             for (idx = 0; idx < this.flies.length; idx++)
             {
-                goal_locations.push(this.flies[idx].location);
+                goalLocations.push(this.flies[idx].location);
             }
 
-            this.path = this.grid.dijkstra_to_closest_goal(this.spider.location.round(), goal_locations);
+            this.path = this.grid.dijkstraToClosestGoal(this.spider.location.round(), goalLocations);
         }
         else if (e.button === 2)
         {
-            this.maze.processClick(new Vector2D(click_x, click_y));
+            this.maze.processClick(clickLocation);
 
             this.maze.render();
 
@@ -245,9 +242,9 @@ var MapperGame = function(display_canvas)
 
             for (idx = 0; idx < this.maze.walls.length; idx++)
             {
-                wall_points.push(this.maze.walls[idx].location);
+                wallLocations.push(this.maze.walls[idx].location);
             }
-            this.grid.updateGridConnections(wall_locations);
+            this.grid.updateGridConnections(wallLocations);
         }
     };
 };

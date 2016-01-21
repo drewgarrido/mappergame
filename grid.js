@@ -18,42 +18,21 @@
     MA 02110-1301, USA.
 */
 
-var Vector2D = function(x_pa, y_pa)
+var Node = function(xp, yp)
 {
-    this.x = x_pa;
-    this.y = y_pa;
-
-    this.isEqual = function(other_v)
-    {
-        var result = false;
-        if (this.x === other_v.x && this.y === other_v.y)
-        {
-            result = true;
-        }
-        return result;
-    };
-
-    this.round = function()
-    {
-        return (new Vector2D(Math.round(this.x), Math.round(this.y)));
-    }
-};
-
-var Node = function(x_pa, y_pa)
-{
-    this.location = new Vector2D(x_pa, y_pa);
+    this.location = new Vector2D(xp, yp);
     this.neighbors = [];
-    this.cost_so_far = Number.MAX_VALUE;
-    this.cost_to = 1;
+    this.costSoFar = Number.MAX_VALUE;
+    this.costTo = 1;
     this.connected = true;
-    this.came_from;
+    this.cameFrom;
 };
 
-var Grid = function(width_pa, height_pa)
+var Grid = function(widthp, heightp)
 {
     this.nodes = [];
-    this.width = width_pa;
-    this.height = height_pa;
+    this.width = widthp;
+    this.height = heightp;
 
     this.initializeGrid = function()
     {
@@ -106,8 +85,8 @@ var Grid = function(width_pa, height_pa)
             for (y = 0; y < this.height; y++)
             {
                 this.nodes[x][y].connected = true;
-                this.nodes[x][y].came_from = undefined;
-                this.nodes[x][y].cost_so_far = Number.MAX_VALUE;
+                this.nodes[x][y].cameFrom = undefined;
+                this.nodes[x][y].costSoFar = Number.MAX_VALUE;
             }
         }
     };
@@ -120,26 +99,26 @@ var Grid = function(width_pa, height_pa)
         {
             for (y = 0; y < this.height; y++)
             {
-                this.nodes[x][y].came_from = undefined;
-                this.nodes[x][y].cost_so_far = Number.MAX_VALUE;
+                this.nodes[x][y].cameFrom = undefined;
+                this.nodes[x][y].costSoFar = Number.MAX_VALUE;
             }
         }
     };
 
     this.updateGridConnections = function(walls)
     {
-        var i, start_x, start_y, end_x, end_y;
+        var i, startX, startY, endX, endY;
 
         for (i = 0; i < walls.length; i++)
         {
-            start_x = Math.max(0, walls[i].x - 32);
-            start_y = Math.max(0, walls[i].y - 32);
-            end_x = Math.min(this.width, walls[i].x + 32);
-            end_y = Math.min(this.height, walls[i].y + 32);
+            startX = Math.max(0, walls[i].x - 32);
+            startY = Math.max(0, walls[i].y - 32);
+            endX = Math.min(this.width, walls[i].x + 32);
+            endY = Math.min(this.height, walls[i].y + 32);
 
-            for (var x = start_x; x < end_x; x++)
+            for (var x = startX; x < endX; x++)
             {
-                for (var y = start_y; y < end_y; y++)
+                for (var y = startY; y < endY; y++)
                 {
                     this.nodes[x][y].connected = false;
                 }
@@ -148,77 +127,77 @@ var Grid = function(width_pa, height_pa)
     };
 
 
-    this.dijkstra_to_closest_goal = function(start_point, goal_points)
+    this.dijkstraToClosestGoal = function(startPoint, goalPoints)
     {
-        var start_node = this.nodes[start_point.x][start_point.y];
-        var frontier = [start_node];    // Priority queue
-        var current_node, next_node, goal_node;
-        var new_cost = 0;
-        var reverse_path = [];
+        var startNode = this.nodes[startPoint.x][startPoint.y];
+        var frontier = [startNode];    // Priority queue
+        var currentNode, nextNode, goalNode;
+        var newCost = 0;
+        var reversePath = [];
         var path = [];
-        var idx, neigh_idx;
+        var idx, neighIdx;
 
         this.resetGridPath();
 
-        start_node.cost_so_far = 0;
+        startNode.costSoFar = 0;
 
-        while (frontier.length > 0 && goal_node === undefined)
+        while (frontier.length > 0 && goalNode === undefined)
         {
-            current_node = frontier.shift();
+            currentNode = frontier.shift();
 
-            for (idx = 0; idx < goal_points.length; idx++)
+            for (idx = 0; idx < goalPoints.length; idx++)
             {
-                if (current_node.location.isEqual(goal_points[idx]))
+                if (currentNode.location.isEqual(goalPoints[idx]))
                 {
-                    goal_node = current_node;
+                    goalNode = currentNode;
                     break;
                 }
             }
 
-            if (goal_node === undefined)
+            if (goalNode === undefined)
             {
-                for (neigh_idx = 0;
-                     neigh_idx < current_node.neighbors.length;
-                     neigh_idx++)
+                for (neighIdx = 0;
+                     neighIdx < currentNode.neighbors.length;
+                     neighIdx++)
                 {
-                    next_node = current_node.neighbors[neigh_idx];
-                    new_cost = current_node.cost_so_far + next_node.cost_to;
+                    nextNode = currentNode.neighbors[neighIdx];
+                    newCost = currentNode.costSoFar + nextNode.costTo;
 
-                    if (next_node.connected &&
-                        new_cost < next_node.cost_so_far)
+                    if (nextNode.connected &&
+                        newCost < nextNode.costSoFar)
                     {
-                        next_node.cost_so_far = new_cost;
+                        nextNode.costSoFar = newCost;
 
                         for (idx = 0; idx < frontier.length; idx++)
                         {
-                            if (frontier[idx].cost_so_far > new_cost)
+                            if (frontier[idx].costSoFar > newCost)
                             {
-                                frontier.splice(idx, 0, next_node);
+                                frontier.splice(idx, 0, nextNode);
                                 break;
                             }
                         }
                         if (idx === frontier.length)
                         {
-                            frontier.push(next_node);
+                            frontier.push(nextNode);
                         }
 
-                        next_node.came_from = current_node;
+                        nextNode.cameFrom = currentNode;
                     }
                 }
             }
         }
 
-        current_node = goal_node;
+        currentNode = goalNode;
 
-        while (current_node.cost_so_far !== 0)
+        while (currentNode.costSoFar !== 0)
         {
-            reverse_path.push(current_node.location);
-            current_node = current_node.came_from;
+            reversePath.push(currentNode.location);
+            currentNode = currentNode.cameFrom;
         }
         // Reverse the list, so index 0 is the start
-        while (reverse_path.length)
+        while (reversePath.length)
         {
-            path.push(reverse_path.pop());
+            path.push(reversePath.pop());
         }
 
         return path;
