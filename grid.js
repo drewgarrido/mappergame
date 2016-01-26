@@ -21,7 +21,7 @@
 var Node = function(xp, yp)
 {
     this.location = new Vector2D(xp, yp);
-    this.neighbors = [];
+    this.edges = [];
     this.costSoFar = Number.MAX_VALUE;
     this.costTo = 1;
     this.connected = true;
@@ -33,8 +33,7 @@ var Grid = function(widthp, heightp)
     this.nodes = [];
     this.width = widthp;
     this.height = heightp;
-    this.startPoint = new Vector2D(0,0);
-    this.goalPoints = [];
+    this.diagonalsEnabled = false;
 
     this.initializeGrid = function()
     {
@@ -55,29 +54,51 @@ var Grid = function(widthp, heightp)
             for (y = 0; y < this.height; y++)
             {
                 node = this.nodes[x][y];
-                node.neighbors = [];
+                node.edges = [];
                 if (x > 0)
                 {
-                    node.neighbors.push(this.nodes[x-1][y]);
+                    node.edges.push({node:this.nodes[x-1][y],cost:1});
                 }
                 if (x < this.width - 1)
                 {
-                    node.neighbors.push(this.nodes[x+1][y]);
+                    node.edges.push({node:this.nodes[x+1][y],cost:1});
                 }
                 if (y > 0)
                 {
-                    node.neighbors.push(this.nodes[x][y-1]);
+                    node.edges.push({node:this.nodes[x][y-1],cost:1});
                 }
                 if (y < this.height - 1)
                 {
-                    node.neighbors.push(this.nodes[x][y+1]);
+                    node.edges.push({node:this.nodes[x][y+1],cost:1});
+                }
+
+                if (this.diagonalsEnabled)
+                {
+                    if (x > 0 && y > 0)
+                    {
+                        if (y > 0)
+                        {
+                            node.edges.push({node:this.nodes[x-1][y-1],cost:1.4});
+                        }
+                        if (y < this.height - 1)
+                        {
+                            node.edges.push({node:this.nodes[x-1][y+1],cost:1.4});
+                        }
+                    }
+                    else if (x < this.width - 1)
+                    {
+                        if (y > 0)
+                        {
+                            node.edges.push({node:this.nodes[x+1][y-1],cost:1.4});
+                        }
+                        if (y < this.height - 1)
+                        {
+                            node.edges.push({node:this.nodes[x+1][y+1],cost:1.4});
+                        }
+                    }
                 }
             }
         }
-
-
-
-        this.goalPoints.push(new Vector2D(0,0));
 
         this.resetGridConnections();
     };
@@ -141,7 +162,7 @@ var Grid = function(widthp, heightp)
         var newCost = 0;
         var reversePath = [];
         var path = [];
-        var idx, neighIdx;
+        var idx, edgeIdx;
 
         this.resetGridPath();
 
@@ -162,12 +183,12 @@ var Grid = function(widthp, heightp)
 
             if (goalNode === undefined)
             {
-                for (neighIdx = 0;
-                     neighIdx < currentNode.neighbors.length;
-                     neighIdx++)
+                for (edgeIdx = 0;
+                     edgeIdx < currentNode.edges.length;
+                     edgeIdx++)
                 {
-                    nextNode = currentNode.neighbors[neighIdx];
-                    newCost = currentNode.costSoFar + nextNode.costTo;
+                    nextNode = currentNode.edges[edgeIdx].node;
+                    newCost = currentNode.costSoFar + currentNode.edges[edgeIdx].cost;
 
                     if (nextNode.connected &&
                         newCost < nextNode.costSoFar)

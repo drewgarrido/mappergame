@@ -275,4 +275,10 @@ function loadImage(src, cb)
     return img1;
 };
 
-
+/* TODO: Animate pathfinding
+ * TODO: Allow diagonals
+ * TODO: Find shortest path to all flies
+ * TODO: A* optimization
+ * TODO: Move spider to flies
+ * TODO: Accounting for motion
+ */
