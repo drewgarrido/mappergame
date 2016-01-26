@@ -33,6 +33,8 @@ var Grid = function(widthp, heightp)
     this.nodes = [];
     this.width = widthp;
     this.height = heightp;
+    this.startPoint = new Vector2D(0,0);
+    this.goalPoints = [];
 
     this.initializeGrid = function()
     {
@@ -72,6 +74,10 @@ var Grid = function(widthp, heightp)
                 }
             }
         }
+
+
+
+        this.goalPoints.push(new Vector2D(0,0));
 
         this.resetGridConnections();
     };

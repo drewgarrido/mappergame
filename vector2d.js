@@ -22,8 +22,11 @@ var Vector2D = function(xp, yp)
 {
     this.x = xp;
     this.y = yp;
+};
 
-    this.isEqual = function(otherV)
+Vector2D.prototype = {
+
+    isEqual: function(otherV)
     {
         var result = false;
         if (this.x === otherV.x && this.y === otherV.y)
@@ -31,42 +34,42 @@ var Vector2D = function(xp, yp)
             result = true;
         }
         return result;
-    };
+    },
 
-    this.round = function()
+    round: function()
     {
         return (new Vector2D(Math.round(this.x), Math.round(this.y)));
-    };
+    },
 
-    this.add = function(otherV)
+    add: function(otherV)
     {
         return (new Vector2D(this.x + otherV.x, this.y + otherV.y));
-    };
+    },
 
-    this.negate = function()
+    negate: function()
     {
         return (new Vector2D(-this.x, -this.y));
-    };
+    },
 
-    this.elementMultiply = function(otherV)
+    elementMultiply: function(otherV)
     {
         return (new Vector2D(this.x * otherV.x, this.y * otherV.y));
-    };
+    },
 
-    this.scale = function(scalar)
+    scale: function(scalar)
     {
         return (new Vector2D(this.x * scalar, this.y * scalar));
-    };
+    },
 
-    this.distance = function(otherV)
+    distance: function(otherV)
     {
         var diffX = this.x - otherV.x;
         var diffY = this.y - otherV.y;
         return (Math.sqrt(diffX * diffX + diffY * diffY));
-    };
+    },
 
-    this.magnitude = function()
+    magnitude: function()
     {
         return (Math.sqrt(this.x * this.x + this.y * this.y));
-    };
+    }
 };

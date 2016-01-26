@@ -27,15 +27,24 @@ var Fly = function(ctxp, locationp, iconp)
     this.height = this.icon.height;
     this.halfWidth = (this.icon.width >> 1);
     this.halfHeight = (this.icon.height >> 1);
+};
 
-    this.render = function()
+Fly.prototype = {
+
+    render: function()
     {
         this.ctx.drawImage(this.icon,
                            this.location.x - this.halfWidth,
                            this.location.y - this.halfHeight);
-    };
+    },
 
-    this.checkCollision = function(otherLocation)
+    setLocation: function(xp, yp)
+    {
+        this.location.x = Math.round(xp);
+        this.location.y = Math.round(yp);
+    },
+
+    checkCollision: function(otherLocation)
     {
         var diffX = Math.abs(otherLocation.x - this.location.x);
         var diffY = Math.abs(otherLocation.y - this.location.y);
@@ -46,5 +55,5 @@ var Fly = function(ctxp, locationp, iconp)
             result = true;
         }
         return result;
-    };
+    }
 };

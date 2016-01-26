@@ -27,6 +27,7 @@ var MapperGame = function(displayCanvas)
     this.width = displayCanvas.width;
     this.height = displayCanvas.height;
 
+    this.spiderIcon;
     this.spider;
     this.flyIcon;
     this.flies = [];
@@ -36,6 +37,19 @@ var MapperGame = function(displayCanvas)
 
     this.initialize = function()
     {
+        this.loadImages(this.initializeObjects.bind(this));
+    };
+
+    /* Must wait for the images to be loaded, or the dimensions
+     * will return a 0 while constructing objects */
+    this.loadImages = function(cb)
+    {
+        this.flyIcon = loadImage('fly.png', undefined);
+        this.spiderIcon = loadImage('spider.png', cb);
+    };
+
+    this.initializeObjects = function()
+    {
         this.bufferCanvas = document.createElement('canvas');
         this.bufferCanvas.width = this.width;
         this.bufferCanvas.height = this.height;
@@ -44,11 +58,10 @@ var MapperGame = function(displayCanvas)
         this.bufferContext = this.bufferCanvas.getContext("2d");
 
         this.spider = new Spider(this.bufferContext,
-                                 loadImage('spider.png'),
+                                 this.spiderIcon,
                                  this.width,
                                  this.height);
 
-        this.flyIcon = loadImage('fly.png');
         this.maze = new Maze(this.bufferContext, this.width, this.height);
         this.grid = new Grid(this.width, this.height);
 
@@ -249,15 +262,17 @@ var MapperGame = function(displayCanvas)
     };
 };
 
-function loadImage(src)
+function loadImage(src, cb)
 {
     var img1 = false;
+
     if (document.images)
     {
         img1 = new Image();
+        img1.onload = cb;
         img1.src = src;
     }
     return img1;
-}
+};
 
 
