@@ -29,15 +29,14 @@ long_line_behaviour=1
 long_line_column=79
 
 [files]
-current_page=7
-FILE_NAME_0=0;HTML;0;EUTF-8;0;1;0;C%3A%5Ccabinet%5Cdata%5Cschool%5Crecurse%5Cmapper%5Cindex.html;0;3
-FILE_NAME_1=4864;Javascript;0;EUTF-8;0;1;0;C%3A%5Ccabinet%5Cdata%5Cschool%5Crecurse%5Cmapper%5Cmappergame.js;0;4
-FILE_NAME_2=4011;Javascript;0;EUTF-8;0;1;0;C%3A%5Ccabinet%5Cdata%5Cschool%5Crecurse%5Cmapper%5Cgrid.js;0;4
-FILE_NAME_3=3398;Javascript;0;EUTF-8;0;1;0;C%3A%5Ccabinet%5Cdata%5Cschool%5Crecurse%5Cmapper%5Cspider.js;0;4
-FILE_NAME_4=2440;Javascript;0;EUTF-8;0;1;0;C%3A%5Ccabinet%5Cdata%5Cschool%5Crecurse%5Cmapper%5Cmaze.js;0;4
-FILE_NAME_5=1630;Javascript;0;EUTF-8;0;1;0;C%3A%5Ccabinet%5Cdata%5Cschool%5Crecurse%5Cmapper%5Cfly.js;0;4
-FILE_NAME_6=855;Javascript;0;EUTF-8;0;1;0;C%3A%5Ccabinet%5Cdata%5Cschool%5Crecurse%5Cmapper%5Cvector2d.js;0;4
-FILE_NAME_7=308;Python;0;EUTF-8;0;1;0;C%3A%5Ccabinet%5Cdata%5Cschool%5Crecurse%5Cmapper%5Cminify.py;0;4
+current_page=2
+FILE_NAME_0=766;HTML;0;EUTF-8;0;1;0;C%3A%5Ccabinet%5Cdata%5Cschool%5Crecurse%5Cmapper%5Cindex.html;0;3
+FILE_NAME_1=3244;Javascript;0;EUTF-8;0;1;0;C%3A%5Ccabinet%5Cdata%5Cschool%5Crecurse%5Cmapper%5Cmappergame.js;0;4
+FILE_NAME_2=8669;Javascript;0;EUTF-8;0;1;0;C%3A%5Ccabinet%5Cdata%5Cschool%5Crecurse%5Cmapper%5Cgrid.js;0;4
+FILE_NAME_3=801;Javascript;0;EUTF-8;0;1;0;C%3A%5Ccabinet%5Cdata%5Cschool%5Crecurse%5Cmapper%5Cspider.js;0;4
+FILE_NAME_4=2204;Javascript;0;EUTF-8;0;1;0;C%3A%5Ccabinet%5Cdata%5Cschool%5Crecurse%5Cmapper%5Cmaze.js;0;4
+FILE_NAME_5=1327;Javascript;0;EUTF-8;0;1;0;C%3A%5Ccabinet%5Cdata%5Cschool%5Crecurse%5Cmapper%5Cfly.js;0;4
+FILE_NAME_6=1018;Javascript;0;EUTF-8;0;1;0;C%3A%5Ccabinet%5Cdata%5Cschool%5Crecurse%5Cmapper%5Cvector2d.js;0;4
 
 [prjorg]
 source_patterns=*.js;*.css;*.html;*.htm;

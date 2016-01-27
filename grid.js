@@ -23,7 +23,6 @@ var Node = function(xp, yp)
     this.location = new Vector2D(xp, yp);
     this.edges = [];
     this.costSoFar = Number.MAX_VALUE;
-    this.costTo = 1;
     this.connected = true;
     this.cameFrom;
 };
@@ -33,7 +32,15 @@ var Grid = function(widthp, heightp)
     this.nodes = [];
     this.width = widthp;
     this.height = heightp;
-    this.diagonalsEnabled = false;
+    this.diagonalsEnabled = true;
+
+    // For searching
+    this.startNode;
+    this.frontier;    // Priority queue
+    this.goalNode;
+    this.path = [];
+    this.pathFound = false;
+    this.intervalId;
 
     this.initializeGrid = function()
     {
@@ -74,7 +81,7 @@ var Grid = function(widthp, heightp)
 
                 if (this.diagonalsEnabled)
                 {
-                    if (x > 0 && y > 0)
+                    if (x > 0)
                     {
                         if (y > 0)
                         {
@@ -85,7 +92,7 @@ var Grid = function(widthp, heightp)
                             node.edges.push({node:this.nodes[x-1][y+1],cost:1.4});
                         }
                     }
-                    else if (x < this.width - 1)
+                    if (x < this.width - 1)
                     {
                         if (y > 0)
                         {
@@ -153,68 +160,94 @@ var Grid = function(widthp, heightp)
         }
     };
 
-
     this.dijkstraToClosestGoal = function(startPoint, goalPoints)
     {
-        var startNode = this.nodes[startPoint.x][startPoint.y];
-        var frontier = [startNode];    // Priority queue
-        var currentNode, nextNode, goalNode;
-        var newCost = 0;
-        var reversePath = [];
-        var path = [];
-        var idx, edgeIdx;
+        this.startNode = this.nodes[startPoint.x][startPoint.y];
+        this.frontier = [this.startNode];    // Priority queue
+        this.newCost = 0;
+        this.reversePath = [];
+        this.path.length = 0;
+        this.pathFound = false;
+        this.goalNode = undefined;
+        this.goalPoints = goalPoints;
 
         this.resetGridPath();
 
-        startNode.costSoFar = 0;
+        this.startNode.costSoFar = 0;
 
-        while (frontier.length > 0 && goalNode === undefined)
+        this.intervalId = setInterval(this.iterateDijkstraToClosestGoal.bind(this), 10);
+    };
+
+    this.iterateDijkstraToClosestGoal = function()
+    {
+        var idx, edgeIdx;
+        var newCost, nextNode, currentNode;
+        var iterCount = 0;
+        var frontierInitialSize = this.frontier.length;
+
+        if (this.frontier.length > 0 && this.goalNode === undefined)
         {
-            currentNode = frontier.shift();
-
-            for (idx = 0; idx < goalPoints.length; idx++)
+            for (iterCount = 0; iterCount < frontierInitialSize; iterCount++)
             {
-                if (currentNode.location.isEqual(goalPoints[idx]))
+                currentNode = this.frontier.shift();
+
+                for (idx = 0; idx < this.goalPoints.length; idx++)
                 {
-                    goalNode = currentNode;
+                    if (currentNode.location.isEqual(this.goalPoints[idx]))
+                    {
+                        this.goalNode = currentNode;
+                        break;
+                    }
+                }
+
+                if (this.goalNode === undefined)
+                {
+                    for (edgeIdx = 0;
+                         edgeIdx < currentNode.edges.length;
+                         edgeIdx++)
+                    {
+                        nextNode = currentNode.edges[edgeIdx].node;
+                        newCost = currentNode.costSoFar + currentNode.edges[edgeIdx].cost;
+
+                        if (nextNode.connected &&
+                            newCost < nextNode.costSoFar)
+                        {
+                            nextNode.costSoFar = newCost;
+
+                            for (idx = 0; idx < this.frontier.length; idx++)
+                            {
+                                if (this.frontier[idx].costSoFar > newCost)
+                                {
+                                    this.frontier.splice(idx, 0, nextNode);
+                                    break;
+                                }
+                            }
+                            if (idx === this.frontier.length)
+                            {
+                                this.frontier.push(nextNode);
+                            }
+
+                            nextNode.cameFrom = currentNode;
+                        }
+                    }
+                }
+                else
+                {
+                    this.finishDijkstraToClosestGoal();
                     break;
                 }
             }
-
-            if (goalNode === undefined)
-            {
-                for (edgeIdx = 0;
-                     edgeIdx < currentNode.edges.length;
-                     edgeIdx++)
-                {
-                    nextNode = currentNode.edges[edgeIdx].node;
-                    newCost = currentNode.costSoFar + currentNode.edges[edgeIdx].cost;
-
-                    if (nextNode.connected &&
-                        newCost < nextNode.costSoFar)
-                    {
-                        nextNode.costSoFar = newCost;
-
-                        for (idx = 0; idx < frontier.length; idx++)
-                        {
-                            if (frontier[idx].costSoFar > newCost)
-                            {
-                                frontier.splice(idx, 0, nextNode);
-                                break;
-                            }
-                        }
-                        if (idx === frontier.length)
-                        {
-                            frontier.push(nextNode);
-                        }
-
-                        nextNode.cameFrom = currentNode;
-                    }
-                }
-            }
         }
+        else
+        {
+            clearInterval(this.intervalId);
+        }
+    };
 
-        currentNode = goalNode;
+    this.finishDijkstraToClosestGoal = function()
+    {
+        var reversePath = [];
+        var currentNode = this.goalNode;
 
         while (currentNode.costSoFar !== 0)
         {
@@ -224,9 +257,34 @@ var Grid = function(widthp, heightp)
         // Reverse the list, so index 0 is the start
         while (reversePath.length)
         {
-            path.push(reversePath.pop());
+            this.path.push(reversePath.pop());
         }
 
-        return path;
+        this.pathFound = true;
+        clearInterval(this.intervalId);
+    };
+
+    this.render = function(ctx)
+    {
+        var idx, idy, dataIdx;
+
+        var imgData = ctx.getImageData(0,0,this.width,this.height);
+
+        for (idx = 0; idx < this.width; idx++)
+        {
+            for (idy = 0; idy < this.height; idy++)
+            {
+                if (this.nodes[idx][idy].costSoFar !== Number.MAX_VALUE)
+                {
+                    dataIdx = (idx + this.width * idy) * 4;
+                    imgData.data[dataIdx] = 0;          // Red
+                    imgData.data[dataIdx+1] = 255;      // Green
+                    imgData.data[dataIdx+2] = 255;      // Blue
+                    imgData.data[dataIdx+3] = 255;      // Alpha
+                }
+            }
+        }
+
+        ctx.putImageData(imgData,0,0);
     };
 };

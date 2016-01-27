@@ -99,6 +99,7 @@ var MapperGame = function(displayCanvas)
 
         // Draw code
         this.maze.render();
+        this.grid.render(this.bufferContext);
 
         for (idx = 0; idx < this.flies.length; idx++)
         {
@@ -165,17 +166,17 @@ var MapperGame = function(displayCanvas)
     {
         var idx;
 
-        if (this.path.length !== 0)
+        if (this.grid.pathFound)
         {
             this.bufferContext.beginPath();
             this.bufferContext.lineWidth="5";
             this.bufferContext.strokeStyle="green";
 
-            this.bufferContext.moveTo(this.path[0].x, this.path[0].y);
+            this.bufferContext.moveTo(this.grid.path[0].x, this.grid.path[0].y);
 
-            for (idx = 1; idx < this.path.length; idx++)
+            for (idx = 1; idx < this.grid.path.length; idx++)
             {
-                this.bufferContext.lineTo(this.path[idx].x, this.path[idx].y);
+                this.bufferContext.lineTo(this.grid.path[idx].x, this.grid.path[idx].y);
             }
 
             this.bufferContext.stroke(); // Draw it
@@ -243,7 +244,7 @@ var MapperGame = function(displayCanvas)
                 goalLocations.push(this.flies[idx].location);
             }
 
-            this.path = this.grid.dijkstraToClosestGoal(this.spider.location.round(), goalLocations);
+            this.grid.dijkstraToClosestGoal(this.spider.location.round(), goalLocations);
         }
         else if (e.button === 2)
         {
