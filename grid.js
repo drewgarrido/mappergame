@@ -23,7 +23,7 @@ var Node = function(xp, yp)
     this.location = new Vector2D(xp, yp);
     this.edges = [];
     this.costSoFar = Number.MAX_VALUE;
-    this.connected = true;
+    this.isNotWall = true;
     this.criticalPoint = false;
     this.cameFrom;
 };
@@ -36,6 +36,7 @@ var Grid = function(widthp, heightp)
     this.diagonalsEnabled = true;
     this.diagonalCost = 1;
     this.criticalPointOpt = false;
+    this.wallCost = 3000;
 
     // For searching
     this.startNode;
@@ -122,7 +123,7 @@ var Grid = function(widthp, heightp)
         {
             for (y = 0; y < this.height; y++)
             {
-                this.nodes[x][y].connected = true;
+                this.nodes[x][y].isNotWall = true;
                 this.nodes[x][y].criticalPoint = false;
                 this.nodes[x][y].cameFrom = undefined;
                 this.nodes[x][y].costSoFar = Number.MAX_VALUE;
@@ -159,7 +160,7 @@ var Grid = function(widthp, heightp)
             {
                 for (var y = startY; y < endY + 1; y++)
                 {
-                    this.nodes[x][y].connected = false;
+                    this.nodes[x][y].isNotWall = false;
                 }
             }
 
@@ -227,7 +228,7 @@ var Grid = function(widthp, heightp)
         var idx, edgeIdx;
         var newCost, nextNode, currentNode;
         var iterCount = 0;
-        var frontierInitialSize = this.frontier.length;
+        var frontierInitialSize = this.frontier.length << 1;
 
         if (this.frontier.length > 0 && this.goalNode === undefined)
         {
@@ -251,10 +252,17 @@ var Grid = function(widthp, heightp)
                          edgeIdx++)
                     {
                         nextNode = currentNode.edges[edgeIdx].node;
-                        newCost = currentNode.costSoFar + currentNode.edges[edgeIdx].cost;
 
-                        if (nextNode.connected &&
-                            newCost < nextNode.costSoFar)
+                        newCost = currentNode.edges[edgeIdx].cost;
+
+                        if (!nextNode.isNotWall)
+                        {
+                            newCost = newCost * this.wallCost;
+                        }
+
+                        newCost += currentNode.costSoFar;
+
+                        if (newCost < nextNode.costSoFar)
                         {
                             nextNode.costSoFar = newCost;
 

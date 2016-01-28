@@ -26,6 +26,7 @@ var MapperGame = function(htmlElements)
     this.bufferContext;
     this.diagCostText = htmlElements.diagCostText;
     this.critPointOptCheck = htmlElements.critPointOptCheck;
+    this.wallCostText = htmlElements.wallCost;
 
     this.width = this.displayCanvas.width;
     this.height = this.displayCanvas.height;
@@ -77,6 +78,8 @@ var MapperGame = function(htmlElements)
         this.checkDiagCost(null);
         this.critPointOptCheck.onchange = this.checkCritPointOpt.bind(this);
         this.checkCritPointOpt(null);
+        this.wallCostText.oninput = this.checkWallCost.bind(this);
+        this.checkWallCost(null);
 
         // Disable the right click context menu
         this.displayCanvas.oncontextmenu = function(){return false;};
@@ -295,6 +298,26 @@ var MapperGame = function(htmlElements)
     {
         this.grid.criticalPointOpt = this.critPointOptCheck.checked;
     };
+
+    this.checkWallCost = function(evt)
+    {
+        var idx;
+        var wallLocations = [];
+        var textStr = this.wallCostText.value;
+        var patt = /^([0-9]+\.[0-9]+|[0-9]+)$/;
+
+        if (patt.test(textStr))
+        {
+            this.grid.wallCost = parseFloat(textStr);
+            this.grid.initializeGrid();
+
+            for (idx = 0; idx < this.maze.walls.length; idx++)
+            {
+                wallLocations.push(this.maze.walls[idx].location);
+            }
+            this.grid.updateGridConnections(wallLocations);
+        }
+    };
 };
 
 function loadImage(src, cb)
@@ -314,8 +337,9 @@ function loadImage(src, cb)
  * Allow diagonals
  * Add controls for optimizations
  * Add critical node optimization for non-45 degree vectors
- * TODO: Critical node optimization sometimes adds a critical node it passes by
+ * Friction walls
  * TODO: Accounting for motion
+ * TODO: Critical node optimization sometimes adds a critical node it passes by
  * TODO: Find shortest path to all flies
  * TODO: Move spider to flies
  * TODO: A* optimization
