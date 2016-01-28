@@ -333,13 +333,8 @@ function loadImage(src, cb)
     return img1;
 };
 
-/* Animate pathfinding
- * Allow diagonals
- * Add controls for optimizations
- * Add critical node optimization for non-45 degree vectors
- * Friction walls
+/* TODO: Critical node optimization sometimes adds a critical node it passes by
  * TODO: Accounting for motion
- * TODO: Critical node optimization sometimes adds a critical node it passes by
  * TODO: Find shortest path to all flies
  * TODO: Move spider to flies
  * TODO: A* optimization

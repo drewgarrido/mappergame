@@ -22,7 +22,6 @@
             game = new MapperGame({mainCanvas: document.getElementById("mapperCanvas"),
                                    diagCostText: document.getElementById("diagonalCost"),
                                    critPointOptCheck: document.getElementById("critPointOpt"),
-                                   motionCompText: document.getElementById("motionCompText"),
                                    wallCost: document.getElementById("wallCostText")
                                   });
             game.initialize();
@@ -40,9 +39,9 @@
     <br>
     Diagonal Cost: <input id="diagonalCost" type="text" value="3.0"><br>
     Wall Cost: <input id="wallCostText" type="text" value="3000"><br>
-    Critical Point Post-Processing: <input id="critPointOpt" type="checkbox"><br>
-    Motion Compensation: <input id="motionCompText" type="text" value="3.0"><br>
-
+    <br>
+    Path only includes wall corners, so path can have any angle and fewer nodes<br>
+    (aka Critical Point Post-Processing): <input id="critPointOpt" type="checkbox"><br>
 </body>
 
 </html>
