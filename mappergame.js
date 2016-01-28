@@ -182,7 +182,7 @@ var MapperGame = function(htmlElements)
         {
             this.bufferContext.beginPath();
             this.bufferContext.lineWidth="5";
-            this.bufferContext.strokeStyle="green";
+            this.bufferContext.strokeStyle="red";
 
             this.bufferContext.moveTo(this.grid.path[0].x, this.grid.path[0].y);
 

@@ -306,7 +306,6 @@ var Grid = function(widthp, heightp)
             reversePath.push(currentNode.location);
             while (currentNode.costSoFar !== 0)
             {
-                console.log(currentNode.location.x, currentNode.location.y);
                 if (currentNode.criticalPoint)
                 {
                     reversePath.push(currentNode.location);
@@ -333,7 +332,7 @@ var Grid = function(widthp, heightp)
 
     this.render = function(ctx)
     {
-        var idx, idy, dataIdx;
+        var idx, idy, dataIdx, adjustingColor;
 
         var imgData = ctx.getImageData(0,0,this.width,this.height);
 
@@ -343,9 +342,10 @@ var Grid = function(widthp, heightp)
             {
                 if (this.nodes[idx][idy].costSoFar !== Number.MAX_VALUE)
                 {
+                    adjustingColor = Math.min(255, Math.round(this.nodes[idx][idy].costSoFar)>>2);
                     dataIdx = (idx + this.width * idy) * 4;
                     imgData.data[dataIdx] = 0;          // Red
-                    imgData.data[dataIdx+1] = 255;      // Green
+                    imgData.data[dataIdx+1] = adjustingColor;      // Green
                     imgData.data[dataIdx+2] = 255;      // Blue
                     imgData.data[dataIdx+3] = 255;      // Alpha
                 }
