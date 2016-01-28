@@ -18,14 +18,17 @@
     MA 02110-1301, USA.
 */
 
-var MapperGame = function(displayCanvas)
+var MapperGame = function(htmlElements)
 {
-    this.displayCanvas = displayCanvas;
+    this.displayCanvas = htmlElements.mainCanvas;
     this.displayContext;
     this.bufferCanvas;
     this.bufferContext;
-    this.width = displayCanvas.width;
-    this.height = displayCanvas.height;
+    this.diagCostText = htmlElements.diagCostText;
+    this.critPointOptCheck = htmlElements.critPointOptCheck;
+
+    this.width = this.displayCanvas.width;
+    this.height = this.displayCanvas.height;
 
     this.spiderIcon;
     this.spider;
@@ -67,7 +70,13 @@ var MapperGame = function(displayCanvas)
 
         document.onkeydown = this.checkKeyDown.bind(this);
         document.onkeyup = this.checkKeyUp.bind(this);
-        displayCanvas.onmousedown = this.checkMouseDown.bind(this);
+        this.displayCanvas.onmousedown = this.checkMouseDown.bind(this);
+
+        // Controls
+        this.diagCostText.oninput = this.checkDiagCost.bind(this);
+        this.checkDiagCost(null);
+        this.critPointOptCheck.onchange = this.checkCritPointOpt.bind(this);
+        this.checkCritPointOpt(null);
 
         // Disable the right click context menu
         this.displayCanvas.oncontextmenu = function(){return false;};
@@ -261,6 +270,31 @@ var MapperGame = function(displayCanvas)
             this.grid.updateGridConnections(wallLocations);
         }
     };
+
+    this.checkDiagCost = function(evt)
+    {
+        var idx;
+        var wallLocations = [];
+        var textStr = this.diagCostText.value;
+        var patt = /^([0-9]+\.[0-9]+|[0-9]+)$/;
+
+        if (patt.test(textStr))
+        {
+            this.grid.diagonalCost = parseFloat(textStr);
+            this.grid.initializeGrid();
+
+            for (idx = 0; idx < this.maze.walls.length; idx++)
+            {
+                wallLocations.push(this.maze.walls[idx].location);
+            }
+            this.grid.updateGridConnections(wallLocations);
+        }
+    };
+
+    this.checkCritPointOpt = function(evt)
+    {
+        this.grid.criticalPointOpt = this.critPointOptCheck.checked;
+    };
 };
 
 function loadImage(src, cb)
@@ -276,10 +310,13 @@ function loadImage(src, cb)
     return img1;
 };
 
-/* TODO: Animate pathfinding
- * TODO: Allow diagonals
- * TODO: Find shortest path to all flies
- * TODO: A* optimization
- * TODO: Move spider to flies
+/* Animate pathfinding
+ * Allow diagonals
+ * Add controls for optimizations
+ * Add critical node optimization for non-45 degree vectors
+ * TODO: Critical node optimization sometimes adds a critical node it passes by
  * TODO: Accounting for motion
+ * TODO: Find shortest path to all flies
+ * TODO: Move spider to flies
+ * TODO: A* optimization
  */

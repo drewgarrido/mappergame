@@ -24,6 +24,7 @@ var Node = function(xp, yp)
     this.edges = [];
     this.costSoFar = Number.MAX_VALUE;
     this.connected = true;
+    this.criticalPoint = false;
     this.cameFrom;
 };
 
@@ -33,6 +34,8 @@ var Grid = function(widthp, heightp)
     this.width = widthp;
     this.height = heightp;
     this.diagonalsEnabled = true;
+    this.diagonalCost = 1;
+    this.criticalPointOpt = false;
 
     // For searching
     this.startNode;
@@ -45,6 +48,7 @@ var Grid = function(widthp, heightp)
     this.initializeGrid = function()
     {
         var x, y, node;
+        var sqrt2 = 1;
 
         for (x = 0; x < this.width; x++)
         {
@@ -85,22 +89,22 @@ var Grid = function(widthp, heightp)
                     {
                         if (y > 0)
                         {
-                            node.edges.push({node:this.nodes[x-1][y-1],cost:1.4});
+                            node.edges.push({node:this.nodes[x-1][y-1],cost:this.diagonalCost});
                         }
                         if (y < this.height - 1)
                         {
-                            node.edges.push({node:this.nodes[x-1][y+1],cost:1.4});
+                            node.edges.push({node:this.nodes[x-1][y+1],cost:this.diagonalCost});
                         }
                     }
                     if (x < this.width - 1)
                     {
                         if (y > 0)
                         {
-                            node.edges.push({node:this.nodes[x+1][y-1],cost:1.4});
+                            node.edges.push({node:this.nodes[x+1][y-1],cost:this.diagonalCost});
                         }
                         if (y < this.height - 1)
                         {
-                            node.edges.push({node:this.nodes[x+1][y+1],cost:1.4});
+                            node.edges.push({node:this.nodes[x+1][y+1],cost:this.diagonalCost});
                         }
                     }
                 }
@@ -119,6 +123,7 @@ var Grid = function(widthp, heightp)
             for (y = 0; y < this.height; y++)
             {
                 this.nodes[x][y].connected = true;
+                this.nodes[x][y].criticalPoint = false;
                 this.nodes[x][y].cameFrom = undefined;
                 this.nodes[x][y].costSoFar = Number.MAX_VALUE;
             }
@@ -150,11 +155,50 @@ var Grid = function(widthp, heightp)
             endX = Math.min(this.width, walls[i].x + 32);
             endY = Math.min(this.height, walls[i].y + 32);
 
-            for (var x = startX; x < endX; x++)
+            for (var x = startX; x < endX + 1; x++)
             {
-                for (var y = startY; y < endY; y++)
+                for (var y = startY; y < endY + 1; y++)
                 {
                     this.nodes[x][y].connected = false;
+                }
+            }
+
+            if (startX > 0)
+            {
+                if (startY > 0)
+                {
+                    this.nodes[startX-1][startY-1].criticalPoint = true;
+                    this.nodes[startX-2][startY-1].criticalPoint = true;
+                    this.nodes[startX-0][startY-1].criticalPoint = true;
+                    this.nodes[startX-1][startY-2].criticalPoint = true;
+                    this.nodes[startX-1][startY-0].criticalPoint = true;
+                }
+                if (endY < this.height - 1)
+                {
+                    this.nodes[startX-1][endY+1].criticalPoint = true;
+                    this.nodes[startX-2][endY+1].criticalPoint = true;
+                    this.nodes[startX-0][endY+1].criticalPoint = true;
+                    this.nodes[startX-1][endY+2].criticalPoint = true;
+                    this.nodes[startX-1][endY+0].criticalPoint = true;
+                }
+            }
+            if (endX < this.width - 1)
+            {
+                if (startY > 0)
+                {
+                    this.nodes[endX+1][startY-1].criticalPoint = true;
+                    this.nodes[endX+2][startY-1].criticalPoint = true;
+                    this.nodes[endX+0][startY-1].criticalPoint = true;
+                    this.nodes[endX+1][startY-2].criticalPoint = true;
+                    this.nodes[endX+1][startY-0].criticalPoint = true;
+                }
+                if (endY < this.height - 1)
+                {
+                    this.nodes[endX+1][endY+1].criticalPoint = true;
+                    this.nodes[endX+2][endY+1].criticalPoint = true;
+                    this.nodes[endX+0][endY+1].criticalPoint = true;
+                    this.nodes[endX+1][endY+2].criticalPoint = true;
+                    this.nodes[endX+1][endY+0].criticalPoint = true;
                 }
             }
         }
@@ -249,17 +293,32 @@ var Grid = function(widthp, heightp)
         var reversePath = [];
         var currentNode = this.goalNode;
 
-        while (currentNode.costSoFar !== 0)
+        if (this.criticalPointOpt)
         {
             reversePath.push(currentNode.location);
-            currentNode = currentNode.cameFrom;
+            while (currentNode.costSoFar !== 0)
+            {
+                console.log(currentNode.location.x, currentNode.location.y);
+                if (currentNode.criticalPoint)
+                {
+                    reversePath.push(currentNode.location);
+                }
+                currentNode = currentNode.cameFrom;
+            }
+
+            reversePath.push(currentNode.location);
         }
-        // Reverse the list, so index 0 is the start
-        while (reversePath.length)
+        else
         {
-            this.path.push(reversePath.pop());
+            while (currentNode.costSoFar !== 0)
+            {
+                reversePath.push(currentNode.location);
+                currentNode = currentNode.cameFrom;
+            }
         }
 
+        // Reverse the list, so index 0 is the start
+        this.path = reversePath.reverse();
         this.pathFound = true;
         clearInterval(this.intervalId);
     };
