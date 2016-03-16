@@ -6,6 +6,7 @@
     <title>Mapper</title>
     <meta http-equiv="content-type" content="text/html;charset=utf-8" />
     <meta name="generator" content="Geany 1.26" />
+    <link rel="stylesheet" type="text/css" href="style.css">
     <script src="vector2d.js"></script>
     <script src="grid.js"></script>
     <script src="maze.js"></script>
@@ -30,6 +31,8 @@
 </head>
 
 <body>
+    <div style="margin:auto;max-width:650px;">
+    <h1>An Animation of Dijkstra's Algorithm</h1>
     <canvas id="mapperCanvas" width="600px" height="450px" style="border:1px solid black"></canvas>
     <div>
         Arrows or WASD move the spider.<br>
@@ -42,6 +45,96 @@
     <br>
     Path only includes wall corners, so path can have any angle and fewer nodes<br>
     (aka Critical Point Post-Processing): <input id="critPointOpt" type="checkbox"><br>
+
+<div style="max-width:30em; margin:auto;">
+<h2>The Explanation</h2>
+<p>
+Dijkstra's algorithm finds the least costly path between 2 nodes on a graph.
+This graph can represent, for example, a travel map or connections in a
+network. In a travel map, the nodes (or vertices) are intersections and the
+edges (or connections) are the length of the road to the next intersection.
+Thus, Dijkstra's could find the shortest path between 2 points in a city.
+Alternately, the edges could be the time taken to travel between
+intersections, so that Dijkstra's instead finds the fastest path between 2
+points.
+</p>
+<p>
+The brilliance of Dijkstra's algorithm is that the shortest path gets extended
+first, so as soon as the algorithm finds the end point, the shortest path is
+found.
+</p>
+<p>
+The spider is the starting point for Dijkstra's algorithm. Once a fly is
+placed as the end point, the animation for Dijkstra's algorithm starts. Each
+pixel on the canvas is a single node in the graph to be traversed. The
+cardinal directions (up, down, left, right) always have a cost of 1. The cost
+of tranversing the diagonals in the graph is adjustable by the "Diagonal Cost"
+field. If the diagonal cost is 2 or greater, the algorithm finds the cardinal
+directions cheaper than using the diagonal links.
+</p>
+<p>
+In the animation, any pixel marked blue is a node that has been traversed. The
+boundary between the searched and unsearched nodes is the wavefront of the
+algorithm. Adjusting the diagonal cost affects the shape of this wavefront. A
+diagonal cost of 2 or greater makes the wavefront diamond-shaped, 1.4 makes
+the wavefront roughly circular, and 1.0 makes the wavefront a square. The
+shape is most easily seen as a reflection of the initial nodes connected to
+the start node.
+</p>
+<div class="figure">
+<img src="cardinal.png"><br>
+Diagonal cost >= 2.0
+</div>
+<div class="figure">
+<img src="diagonal.png"><br>
+Diagonal cost = 1.0
+</div>
+
+<p>
+Dijkstra's algorithm works even when the graph is not a simple grid. Adding
+walls by right-clicking will effectively disconnect those pixels from the
+grid, and force the path to go around.
+</p>
+<div class="figure">
+<img src="complicated.png"><br>
+Going around obstacles
+</div>
+<p>
+These wall costs are also adjustable, and the wavefront will start to engulf
+the walls if the wall cost gets below ~50. At 5 or 10, the wavefront looks
+much like ocean waves engulfing sandcastle walls.
+</p>
+<div class="figure">
+<img src="engulf.png"><br>
+Wall cost = 10. No, the spider still cannot go through the walls.
+</div>
+<p>
+As an optimization, I tried to simpilify the path by finding where the path
+turns. These turns are only necessary at the wall corners, so only nodes at
+the wall corners need to be recorded and the path can turned into a much
+shorter list of waypoints. There are corner cases where this does not work to
+identify the shortest path, particularly when the path happens to go by a
+corner instead of going around it. These points could be filtered out by
+checking the path at the corner nodes.
+</p>
+<p>
+Additional areas to explore: A* (or A-star) search is a special case of
+Dijkstra's that optimizes the search path by adding a heuristic function. By
+analogy, A* is much like knowing the rough direction to search for the end
+point. This optimization is only possible if the graph has properties that can
+be described by a heuristic function, a property like having the graph be in a
+grid. The heuristic function can then be the Pythagorean distance or the
+Manhattan distance. I did not use A* because the animation may have multiple
+end points (multiple flies) and I wanted to indicate the closest fly.
+</p>
+<p>
+Originally, I had the idea to see if I could change the path to include
+momentum, which can be experienced by moving the spider with the arrow keys.
+While I didn't implement this idea, it would be interesting to explore
+further.
+</p>
+</div>
+</div>
 </body>
 
 </html>
