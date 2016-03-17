@@ -31,7 +31,9 @@
 </head>
 
 <body>
-    <div style="margin:auto;max-width:650px;">
+    <div style="margin:auto;max-width:600px;">
+    <a href="https://github.com/drewgarrido/mappergame">Download the source</a>
+    or see the <a href="#explanation">explanation below</a>
     <h1>An Animation of Dijkstra's Algorithm</h1>
     <canvas id="mapperCanvas" width="600px" height="450px" style="border:1px solid black"></canvas>
     <div>
@@ -46,8 +48,7 @@
     Path only includes wall corners, so path can have any angle and fewer nodes<br>
     (aka Critical Point Post-Processing): <input id="critPointOpt" type="checkbox"><br>
 
-<div style="max-width:30em; margin:auto;">
-<h2>The Explanation</h2>
+<h2 id="explanation">The Explanation</h2>
 <p>
 Dijkstra's algorithm finds the least costly path between 2 nodes on a graph.
 This graph can represent, for example, a travel map or connections in a
@@ -58,7 +59,7 @@ Alternately, the edges could be the time taken to travel between
 intersections, so that Dijkstra's instead finds the fastest path between 2
 points.
 </p>
-<p>
+<p style="font-size:1.1 em;">
 
 The brilliance of Dijkstra's algorithm is that the shortest path found so far
 gets extended first, so as soon as the algorithm finds the end point, the
@@ -99,7 +100,9 @@ Diagonal cost = 1.0
 <p>
 Dijkstra's algorithm works even when the graph is not a simple grid. Adding
 walls by right-clicking will effectively disconnect those pixels from the
-grid, and force the path to go around.
+grid, and force the path to go around. Note that the animation will create
+a white margin around the walls. The search finds the best path of the
+<b>center</b> of the spider, taking into accound the size of the spider.
 </p>
 <div class="figure">
 <img src="complicated.png"><br>
@@ -123,15 +126,18 @@ identify the shortest path, particularly when the path happens to go by a
 corner instead of going around it. These points could be filtered out by
 checking the path at the corner nodes.
 </p>
+<h2>Additional Areas to Explore</h2>
 <p>
-Additional areas to explore: A* (or A-star) search is a special case of
-Dijkstra's that optimizes the search path by adding a heuristic function. By
-analogy, A* is much like knowing the rough direction to search for the end
-point. This optimization is only possible if the graph has properties that can
-be described by a heuristic function, a property like having the graph be in a
-grid. The heuristic function can then be the Pythagorean distance or the
-Manhattan distance. I did not use A* because the animation may have multiple
-end points (multiple flies) and I wanted to indicate the closest fly.
+
+A* (or A-star) search is a special case of Dijkstra's that optimizes the
+search path by adding a heuristic function. By analogy, A* is much like
+knowing the rough direction to search for the end point. This optimization is
+only possible if the graph has properties that can be described by a heuristic
+function, a property like having the graph be in a grid. The heuristic
+function can then be the Pythagorean distance or the Manhattan distance. I did
+not use A* because the animation may have multiple end points (multiple flies)
+and I wanted to indicate the closest fly.
+
 </p>
 <p>
 Originally, I had the idea to see if I could change the path to include
@@ -139,8 +145,10 @@ momentum, which can be experienced by moving the spider with the arrow keys.
 While I didn't implement this idea, it would be interesting to explore
 further.
 </p>
+
+<p style="text-align:center;">&copy; 2016 - Drew Garrido</p>
 </div>
-</div>
+
 </body>
 
 </html>
