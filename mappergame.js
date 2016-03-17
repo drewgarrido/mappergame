@@ -331,7 +331,7 @@ function loadImage(src, cb)
         img1.src = src;
     }
     return img1;
-};
+}
 
 /* TODO: Critical node optimization sometimes adds a critical node it passes by
  * TODO: Accounting for motion
